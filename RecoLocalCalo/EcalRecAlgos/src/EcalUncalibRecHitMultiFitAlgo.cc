@@ -87,23 +87,42 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
     }    
         
   }
+
   
+  bool usePrefit = false;
+  
+  FullSampleVector modified_fullpulse = fullpulse;
+  FullSampleMatrix modified_fullpulsecov = fullpulsecov;
   
   if (maxGainSwitch != 1) {
     //  there was a gain switch 
     // -> remove iSample = 4 --> slew rate
+    amplitudes[4] = 0; 
+    
+    // now remove the point (4)    
+    modified_fullpulse(4+7) = 0;
+    
+    for (int iPosition = 0; iPosition<modified_fullpulse.rows(); iPosition++) {
+      modified_fullpulsecov(iPosition+7, 4+7) = 0;
+      modified_fullpulsecov(4+7, iPosition+7) = 0;  
+    }
+         
+    // use _singlebx instead of activeBX
     // -> perform single template fit
+    usePrefit = true;
+        
   }
-  amplitudes[iSample] 
   
   
-  double amplitude, amperr, chisq;
+  double amplitude = 0;
+  double amperr = 0;
+  double chisq = 0;
+  
   bool status = false;
   
   //optimized one-pulse fit for hlt
-  bool usePrefit = false;
   if (_doPrefit) {
-    status = _pulsefuncSingle.DoFit(amplitudes,noisecor,pedrms,_singlebx,fullpulse,fullpulsecov);
+    status = _pulsefuncSingle.DoFit(amplitudes,noisecor,pedrms,_singlebx,modified_fullpulse,modified_fullpulsecov);
     amplitude = status ? _pulsefuncSingle.X()[0] : 0.;
     amperr = status ? _pulsefuncSingle.Errors()[0] : 0.;
     chisq = _pulsefuncSingle.ChiSq();
@@ -116,7 +135,7 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
   if (!usePrefit) {
   
     if(!_computeErrors) _pulsefunc.disableErrorCalculation();
-    status = _pulsefunc.DoFit(amplitudes,noisecor,pedrms,activeBX,fullpulse,fullpulsecov);
+    status = _pulsefunc.DoFit(amplitudes,noisecor,pedrms,activeBX,modified_fullpulse,modified_fullpulsecov);
     chisq = _pulsefunc.ChiSq();
     
     if (!status) {
