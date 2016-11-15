@@ -94,12 +94,13 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
   FullSampleVector modified_fullpulse = fullpulse;
   FullSampleMatrix modified_fullpulsecov = fullpulsecov;
   
-  if (maxGainSwitch != 1) {
+  //                         protection
+  if (maxGainSwitch != 1 && amplitudes.rows() >= 5) {
     //  there was a gain switch 
     // -> remove iSample = 4 --> slew rate
     amplitudes[4] = 0; 
     
-    // now remove the point (4)    
+    // -> now remove the point (4) in the expected pulse and covariance matrix
     modified_fullpulse(4+7) = 0;
     
     for (int iPosition = 0; iPosition<modified_fullpulse.rows(); iPosition++) {
