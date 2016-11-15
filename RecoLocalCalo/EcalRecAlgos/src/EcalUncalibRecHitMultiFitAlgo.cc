@@ -31,6 +31,8 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
   double pedval = 0.;
   double pedrms = 0.;
   
+  int maxGainSwitch = 1;
+  
   SampleVector amplitudes;
   for(unsigned int iSample = 0; iSample < nsample; iSample++) {
     
@@ -38,6 +40,15 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
     
     double amplitude = 0.;
     int gainId = sample.gainId();
+    
+    // gainId
+    //   0 = saturation
+    //   1 = gain 12  -> the standard
+    //   2 = gain 6
+    //   3 = gain 1
+    if (gainId != 1) {
+      maxGainSwitch = gainId;
+    }
     
     double pedestal = 0.;
     double pederr = 0.;
@@ -76,6 +87,15 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
     }    
         
   }
+  
+  
+  if (maxGainSwitch != 1) {
+    //  there was a gain switch 
+    // -> remove iSample = 4 --> slew rate
+    // -> perform single template fit
+  }
+  amplitudes[iSample] 
+  
   
   double amplitude, amperr, chisq;
   bool status = false;
