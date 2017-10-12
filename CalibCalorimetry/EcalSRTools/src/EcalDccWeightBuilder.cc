@@ -98,7 +98,8 @@ EcalDccWeightBuilder::analyze(const edm::Event& event,
 
   //gets geometry
   es.get<CaloGeometryRecord>().get(geom_);
-
+  const CaloGeometry *geometry = geom_.product();
+  
   
   //computes the weights:
   computeAllWeights(dccWeightsWithIntercalib_);
@@ -114,14 +115,12 @@ void EcalDccWeightBuilder::computeAllWeights(bool withIntercalib){
   int iSkip0_ = sampleToSkip_>=0?(sampleToSkip_-dcc1stSample_):-1;
 
   EcalSimParameterMap parameterMap;
-  const vector<DetId>& ebDetIds
-    = geom_->getValidDetIds(DetId::Ecal, EcalBarrel);
+  const vector<DetId>& ebDetIds = geom_->getValidDetIds(DetId::Ecal, EcalBarrel);
 
   //   cout << __FILE__ << ":" << __LINE__ << ": "
   //        <<  "Number of EB det IDs: " << ebDetIds.size() << "\n";
   
-  const vector<DetId>& eeDetIds
-    = geom_->getValidDetIds(DetId::Ecal, EcalEndcap);
+  const vector<DetId>& eeDetIds = geom_->getValidDetIds(DetId::Ecal, EcalEndcap);
 
   //  cout << __FILE__ << ":" << __LINE__ << ": "
   //        <<  "Number of EE det IDs: " << eeDetIds.size() << "\n";
