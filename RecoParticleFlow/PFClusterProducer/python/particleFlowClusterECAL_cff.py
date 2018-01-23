@@ -8,3 +8,8 @@ from Configuration.Eras.Modifier_run2_ECAL_2017_cff import run2_ECAL_2017
 run2_ECAL_2017.toModify(particleFlowClusterECAL,
                         energyCorrector = dict(srfAwareCorrection = True, maxPtForMVAEvaluation = 300.))
 
+
+from Configuration.Eras.Modifier_run2_ECAL_2018_cff import run2_ECAL_2018
+run2_ECAL_2018.toModify(particleFlowClusterECAL,
+                        energyCorrector = dict(srfAwareCorrection = True, maxPtForMVAEvaluation = 300.))
+
