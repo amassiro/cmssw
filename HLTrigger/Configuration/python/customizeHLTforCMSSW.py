@@ -70,6 +70,29 @@ def customiseFor2017DtUnpacking(process):
 
     return process
 
+
+
+# Test thresholds for particleFlowRechitECAL
+def customiseForEcalTestPR22254(process):
+    from Configuration.Eras.Modifier_run2_ECAL_2017_cff import run2_ECAL_2017
+    from RecoParticleFlow.PFClusterProducer.particleFlowZeroSuppressionECAL_cff import _particle_flow_zero_suppression_ECAL_2017
+
+    for hltParticleFlowRecHitECAL in ['hltParticleFlowRecHitECALUnseeded', 'hltParticleFlowRecHitECALL1Seeded', 'hltParticleFlowRecHitECALForMuonsMF', 'hltParticleFlowRecHitECALForTkMuonsMF']: 
+        if hasattr(process,hltParticleFlowRecHitECAL):                                                 
+            module = getattr(process,hltParticleFlowRecHitECAL)
+
+            for producer in module.producers: 
+                if hasattr(producer,'qualityTests'):
+                    for qualityTest in producer.qualityTests:
+                        if hasattr(qualityTest,'thresholds'):
+                            qualityTest.thresholds = _particle_flow_zero_suppression_ECAL_2017.thresholds 
+                        
+    return process
+
+
+
+
+
 # CMSSW version specific customizations
 def customizeHLTforCMSSW(process, menuType="GRun"):
 
