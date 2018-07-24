@@ -68,7 +68,7 @@ void TestEcalDigi<DigiCollection>::default_ctor() {
   // against enum in ExDetID
   CPPUNIT_ASSERT(frames.subdetId()==DigiCollection::DetId::Subdet);
   // against static metod in ExDetID
-  CPPUNIT_ASSERT(frames.subdetId()==DigiCollection::DetId::subdet());
+//   CPPUNIT_ASSERT(frames.subdetId()==DigiCollection::DetId::subdet());   //------------- ???   error: cannot call member function 'constexpr EcalSubdetector EBDetId::subdet() const' without object    CPPUNIT_ASSERT(frames.subdetId()==DigiCollection::DetId::subdet());
   DigiCollection smallframes(1);
   CPPUNIT_ASSERT(smallframes.stride()==1);
 

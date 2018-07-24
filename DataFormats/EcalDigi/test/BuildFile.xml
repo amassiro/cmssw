@@ -4,3 +4,13 @@
 <use   name="DataFormats/EcalDigi"/>
 <bin   file="EcalDigi_t.cpp">
 </bin>
+
+<!--<architecture match="_amd64_">
+  <bin name="test_ecal_digi" file="test_ecal_digi.cu">
+    <use name="DataFormats/DetId"/>
+    <use name="DataFormats/EcalDetId"/>
+    <use name="DataFormats/EcalDigi"/>
+    <use name="DataFormats/Common"/>
+  </bin>
+</architecture>-->
+
