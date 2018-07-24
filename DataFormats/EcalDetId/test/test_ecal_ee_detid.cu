@@ -21,7 +21,7 @@ __global__ void test_gen_ecal_detid(EEDetId *id) {
     did.iy();    
     did.zside(); 
     did.subdet();
-//     did.sc(); //  ---> exception??????
+    did.sc(); //  ---> exception?????? Not anymore thanks to       #ifdef __CUDA_ARCH__
     //     did.isc();   -->  error: identifier "EEDetId::isc const" is undefined in device code
     did.ic();
     did.iquadrant();

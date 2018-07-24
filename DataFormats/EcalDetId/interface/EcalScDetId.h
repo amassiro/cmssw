@@ -58,8 +58,12 @@ class EcalScDetId : public DetId {
   {
     if(!validDetId(ix,iy,iz))
     {
+      #ifdef __CUDA_ARCH__
+      return;
+      #else
       throw cms::Exception("InvalidDetId") << "EcalScDetId:  Cannot create object.  Indexes out of bounds \n" 
       << "x = " << ix << " y = " << iy << " z = " << iz;
+      #endif
     }
     const int scBit = 1<<15; //bit set to 1 to distinguish from crystal id (EEDetId)
     //                         and for a reasonale behaviour of DetId ccomparison operators.
