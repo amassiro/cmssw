@@ -28,9 +28,9 @@
 </architecture>
 
 
-<!--<architecture match="_amd64_">
-<bin name="test_ecal_eb_detid" file="test_ecal_eb_detid.cu">
-<use name="DataFormats/DetId"/>
-<use name="DataFormats/EcalDetId"/>
-</bin>
-</architecture>-->
+<architecture match="_amd64_">
+  <bin name="test_ecal_eb_detid" file="test_ecal_eb_detid.cu">
+    <use name="DataFormats/DetId"/>
+    <use name="DataFormats/EcalDetId"/>
+  </bin>
+</architecture>
