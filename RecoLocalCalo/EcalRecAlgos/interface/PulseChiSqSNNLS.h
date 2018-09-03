@@ -34,6 +34,7 @@ class PulseChiSqSNNLS {
     
     bool Minimize(const SampleMatrix &samplecov, const FullSampleMatrix &fullpulsecov);
     bool NNLS();
+    bool OldNNLS();
     void NNLSUnconstrainParameter(Index idxp);
     void NNLSConstrainParameter(Index minratioidx);
     bool OnePulseMinimize();
@@ -70,6 +71,7 @@ class PulseChiSqSNNLS {
     bool _computeErrors;
     int _maxiters;
     bool _maxiterwarnings;
+    bool _useOld;
 };
 
 #endif

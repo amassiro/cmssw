@@ -76,7 +76,8 @@ PulseChiSqSNNLS::PulseChiSqSNNLS() :
   _chisq(0.),
   _computeErrors(true),
   _maxiters(50),
-  _maxiterwarnings(true)
+  _maxiterwarnings(true),
+  _useOld(false)
 {
   
 }  
@@ -250,7 +251,8 @@ bool PulseChiSqSNNLS::Minimize(const SampleMatrix &samplecov, const FullSampleMa
     status = updateCov(samplecov,fullpulsecov);    
     if (!status) break; 
     if (npulse>1) {
-      status = NNLS();
+      if (!_useOld) status = NNLS();
+      else          status = OldNNLS();
     }
     else {
       //special case for one pulse fit (performance optimized)
@@ -322,11 +324,138 @@ double PulseChiSqSNNLS::ComputeApproxUncertainty(unsigned int ipulse) {
 
 bool PulseChiSqSNNLS::NNLS() {
   
+  // Fast NNLS (fnnls) algorithm as per
+  // http://users.wfu.edu/plemmons/papers/Chennnonneg.pdf
+  // page 8
+  
+  // FNNLS memorizes the A^T * A and A^T * b to reduce the computation.
+  // The pseudo-inverse obtained has the same numerical problems so
+  // I keep the same decomposition utilized for NNLS.
+  
+  // pseudoinverse (A^T * A)^-1 * A^T
+  // this pseudo-inverse has numerical issues
+  // in order to avoid that I substituted the pseudoinverse whit the QR
+  // decomposition
+  
+  // I'm substituting the vectors P and R that represents active and passive set
+  // with a boolean vector: if active_set[i] the i belogns to R else to P
+  
+  // bool active_set[VECTOR_SIZE];
+  // memset(active_set, true, VECTOR_SIZE * sizeof(bool));
+  
+  int max_iterations = 500;
+  //   SampleVectorSize --> 10
+
+//   auto nPassive = 0;  ---> _nP
+//   x --> _ampvec
+  double threshold = 1e-11;
+  
+//   A --> _pulsemat
+//   b --> _sampvec
+  
+  FullSampleMatrix AtA = _pulsemat.transpose() * _pulsemat; 
+  FullSampleVector Atb = _pulsemat.transpose() * _sampvec;
+  
+  FullSampleVector s;
+  FullSampleVector w;
+  
+  Eigen::PermutationMatrix<SampleVectorSize> permutation;
+  permutation.setIdentity();
+  
+  for (int iter = 0; iter < max_iterations; ++iter) {
+    const int nActive = SampleVectorSize - _nP;
+    
+    if(!nActive)
+      break;
+    
+    w.tail(nActive) = Atb.tail(nActive) - (AtA * _ampvec).tail(nActive);
+    
+    // get the index of w that gives the maximum gain
+    Index w_max_idx;
+    const double max_w = w.tail(nActive).maxCoeff(&w_max_idx);
+    
+    // check for convergence
+    if (max_w < threshold )
+      break;
+    
+    // cout << "n active " << nActive << endl;
+    // cout << "w max idx " << w_max_idx << endl;
+    
+    // need to translate the index into the right part of the vector
+    w_max_idx += _nP;
+    
+    // swap AtA to avoid copy
+    AtA.col(_nP).swap(AtA.col(w_max_idx));
+    AtA.row(_nP).swap(AtA.row(w_max_idx));
+    // swap Atb to match with AtA
+    Eigen::numext::swap(Atb.coeffRef(_nP), Atb.coeffRef(w_max_idx));
+    Eigen::numext::swap(_ampvec.coeffRef(_nP), _ampvec.coeffRef(w_max_idx));
+    // swap the permutation matrix to reorder the solution in the end
+    Eigen::numext::swap(permutation.indices()[_nP],
+                        permutation.indices()[w_max_idx]);
+    
+    ++_nP;
+    
+    
+    while (_nP > 0) {
+      s.head(_nP) =
+      AtA.topLeftCorner(_nP, _nP).llt().solve(Atb.head(_nP));
+      
+      if (s.head(_nP).minCoeff() > 0.) {
+        _ampvec.head(_nP) = s.head(_nP);
+        break;
+      }
+      
+      
+      
+      double alpha = std::numeric_limits<double>::max();
+      Index alpha_idx = 0;
+      
+      
+      for (unsigned int i = 0; i < _nP; ++i) {
+        if (s[i] <= 0.) {
+          const double ratio = _ampvec[i] / (_ampvec[i] - s[i]);
+          if (ratio < alpha) {
+            alpha = ratio;
+            alpha_idx = i;
+          }
+        }
+      }
+      if (std::numeric_limits<double>::max() == alpha) {
+        _ampvec.head(_nP) = s.head(_nP);
+        break;
+      }
+      
+      
+      _ampvec.head(_nP) += alpha * (s.head(_nP) - _ampvec.head(_nP));
+      _ampvec[alpha_idx] = 0;
+      --_nP;
+      
+      
+      AtA.col(_nP).swap(AtA.col(alpha_idx));
+      AtA.row(_nP).swap(AtA.row(alpha_idx));
+      // swap Atb to match with AtA
+      Eigen::numext::swap(Atb.coeffRef(_nP), Atb.coeffRef(alpha_idx));
+      Eigen::numext::swap(_ampvec.coeffRef(_nP), _ampvec.coeffRef(alpha_idx));
+      // swap the permutation matrix to reorder the solution in the end
+      Eigen::numext::swap(permutation.indices()[_nP],
+                          permutation.indices()[alpha_idx]);
+    }
+  }
+  _ampvec = _ampvec.transpose() * permutation.transpose();
+  
+  return true;
+  
+}
+
+
+bool PulseChiSqSNNLS::OldNNLS() {
+  
   //Fast NNLS (fnnls) algorithm as per http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.157.9203&rep=rep1&type=pdf
   
   const unsigned int npulse = _bxs.rows();
   constexpr unsigned int nsamples = SampleVector::RowsAtCompileTime;
-
+  
   invcovp = _covdecomp.matrixL().solve(_pulsemat);
   aTamat.noalias() = invcovp.transpose().lazyProduct(invcovp);
   aTbvec.noalias() = invcovp.transpose().lazyProduct(_covdecomp.matrixL().solve(_sampvec));
@@ -360,7 +489,7 @@ bool PulseChiSqSNNLS::NNLS() {
       Index idxp = _nP + idxwmax;
       NNLSUnconstrainParameter(idxp);
     }
-
+    
     
     while (true) {
       //printf("iter in, idxsP = %i\n",int(_idxsP.size()));
@@ -382,7 +511,7 @@ bool PulseChiSqSNNLS::NNLS() {
         _ampvec.head(_nP) = ampvecpermtest.head(_nP);
         break;
       }      
-
+      
       //update parameter vector
       Index minratioidx=0;
       
@@ -390,7 +519,7 @@ bool PulseChiSqSNNLS::NNLS() {
       double minratio = std::numeric_limits<double>::max();
       for (unsigned int ipulse=0; ipulse<_nP; ++ipulse) {
         if (ampvecpermtest.coeff(ipulse)<=0.) {
-	  const double c_ampvec = _ampvec.coeff(ipulse);
+          const double c_ampvec = _ampvec.coeff(ipulse);
           const double ratio = c_ampvec/(c_ampvec-ampvecpermtest.coeff(ipulse));
           if (ratio<minratio) {
             minratio = ratio;
@@ -398,12 +527,12 @@ bool PulseChiSqSNNLS::NNLS() {
           }
         }
       }
-
+      
       _ampvec.head(_nP) += minratio*(ampvecpermtest.head(_nP)- _ampvec.head(_nP));
       
       //avoid numerical problems with later ==0. check
       _ampvec.coeffRef(minratioidx) = 0.;
-            
+      
       //printf("removing index %i, orig idx %i\n",int(minratioidx),int(_bxs.coeff(minratioidx)));
       NNLSConstrainParameter(minratioidx);    
     }
