@@ -241,6 +241,8 @@ bool PulseChiSqSNNLS::Minimize(const SampleMatrix &samplecov, const FullSampleMa
   bool status = false;
   while (true) {    
     
+//     std::cout << " iter = " << iter << std::endl;
+    
     if (iter>=_maxiters) {
       if (_maxiterwarnings) {
         LogDebug("PulseChiSqSNNLS::Minimize") << "Max Iterations reached at iter " << iter;
@@ -353,8 +355,11 @@ bool PulseChiSqSNNLS::NNLS() {
 //   A --> _pulsemat
 //   b --> _sampvec
   
-  FullSampleMatrix AtA = _pulsemat.transpose() * _pulsemat; 
-  FullSampleVector Atb = _pulsemat.transpose() * _sampvec;
+  SamplePulseMatrix A = _covdecomp.matrixL().solve(_pulsemat);
+  PulseVector b = _covdecomp.matrixL().solve(_sampvec);
+  
+  FullSampleMatrix AtA = A.transpose() * A; 
+  FullSampleVector Atb = A.transpose() * b;
   
   FullSampleVector s;
   FullSampleVector w;
