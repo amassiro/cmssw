@@ -200,6 +200,8 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
       }
     }
     
+//     std::cout << " status:ipulseintime = " << status << " : " << ipulseintime << std::endl;
+    
     amplitude = status ? _pulsefunc.X()[ipulseintime] : 0.;
     amperr = status ? _pulsefunc.Errors()[ipulseintime] : 0.;
   
@@ -213,6 +215,7 @@ EcalUncalibratedRecHit EcalUncalibRecHitMultiFitAlgo::makeRecHit(const EcalDataF
   if (!usePrefit) {
     for (unsigned int ipulse=0; ipulse<_pulsefunc.BXs().rows(); ++ipulse) {
       int bx = _pulsefunc.BXs().coeff(ipulse);
+//       std::cout << "              bx = " << bx << std::endl;
       if (bx!=0 && std::abs(bx)<100) {
         rh.setOutOfTimeAmplitude(bx+5, status ? _pulsefunc.X().coeff(ipulse) : 0.);
       }

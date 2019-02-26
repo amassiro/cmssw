@@ -157,6 +157,8 @@ class EcalUncalibRecHitWorkerMultiFitGpu final : public EcalUncalibRecHitWorkerB
                 double chi2ThreshEB_;
                 double chi2ThreshEE_;
 
+                
+        public:                
                 //---- for GPU 
                 // device variables ...
                 float* d_vector_vector_digis;

@@ -134,11 +134,14 @@ EcalUncalibRecHitWorkerMultiFitGpu::EcalUncalibRecHitWorkerMultiFitGpu(const edm
 
 
   h_vector_vector_digis = new float [10 * 61200];  // on the host
-
   h_vector_vector_amplitudes = new float [10 * 61200];  // on the host
   h_vector_chi2 = new float [61200];  // on the host
+//   
   
   
+//   h_vector_vector_digis      = (float *) malloc(10 * 61200 * sizeof(float));
+//   h_vector_vector_amplitudes = (float *) malloc(10 * 61200 * sizeof(float));
+//   h_vector_chi2              = (float *) malloc(     61200 * sizeof(float));
   
   
   
@@ -153,6 +156,11 @@ EcalUncalibRecHitWorkerMultiFitGpu::EcalUncalibRecHitWorkerMultiFitGpu(const edm
   h_vector_long_vector_correlation_matrix = new float [EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES * 61200];  // on the host
   h_vector_long_vector_noise_matrix       = new float [10*10 * 61200];  // on the host
   h_vector_vector_pulses                  = new float [EcalPulseShape::TEMPLATESAMPLES    * 61200];  // on the host
+  
+//   h_vector_long_vector_correlation_matrix = (float *) malloc( EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES * 61200  * sizeof(float) );  // on the host
+//   h_vector_long_vector_noise_matrix       = (float *) malloc( 10*10 * 61200                                                            * sizeof(float) );  // on the host
+//   h_vector_vector_pulses                  = (float *) malloc( EcalPulseShape::TEMPLATESAMPLES    * 61200                               * sizeof(float) );  // on the host
+  
   
   
 //   EcalPulseShape::TEMPLATESAMPLES = 12
@@ -417,7 +425,9 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
       
       //----                                        12
       for (int iSample=0; iSample<EcalPulseShape::TEMPLATESAMPLES; iSample++) {
-        h_vector_vector_pulses[hashedIndex*EcalPulseShape::TEMPLATESAMPLES+iSample] = ((float) aPulse->pdfval[iSample] );
+//         h_vector_vector_pulses[hashedIndex*EcalPulseShape::TEMPLATESAMPLES+iSample] = ((float) aPulse->pdfval[iSample] );
+        h_vector_vector_pulses[numRechits*EcalPulseShape::TEMPLATESAMPLES+iSample] = ((float) aPulse->pdfval[iSample] );
+        //         std::cout << "h_vector_vector_pulses[" << hashedIndex*EcalPulseShape::TEMPLATESAMPLES << " + " << iSample << " = " << h_vector_vector_pulses[hashedIndex*EcalPulseShape::TEMPLATESAMPLES+iSample] << std::endl;
       }
       
       //---- FIXME: fill h_vector_long_vector_correlation_matrix and h_vector_long_vector_noise_matrix
@@ -425,8 +435,9 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
       
       for(int i=0; i<EcalPulseShape::TEMPLATESAMPLES;i++) {
         for(int j=0; j<EcalPulseShape::TEMPLATESAMPLES;j++) {
-          h_vector_long_vector_correlation_matrix [hashedIndex * (EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES) + EcalPulseShape::TEMPLATESAMPLES * i + j] =  aPulseCov->covval[i][j];
-//           fullpulsecov(i+7,j+7) = aPulseCov->covval[i][j];
+//           h_vector_long_vector_correlation_matrix [hashedIndex * (EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES) + EcalPulseShape::TEMPLATESAMPLES * i + j] =  aPulseCov->covval[i][j];
+          h_vector_long_vector_correlation_matrix [numRechits * (EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES) + EcalPulseShape::TEMPLATESAMPLES * i + j] =  aPulseCov->covval[i][j];
+          //           fullpulsecov(i+7,j+7) = aPulseCov->covval[i][j];
         }
       }
         
@@ -490,7 +501,8 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
          }
          
          //---- fill the digis
-         h_vector_vector_digis[hashedIndex*10+iSample] = ((float) (((EcalDataFrame)(*itdg)).sample(iSample).adc()) - pedestal);
+//          h_vector_vector_digis[hashedIndex*10+iSample] = ((float) (((EcalDataFrame)(*itdg)).sample(iSample).adc()) - pedestal);
+         h_vector_vector_digis[numRechits*10+iSample] = ((float) (((EcalDataFrame)(*itdg)).sample(iSample).adc()) - pedestal);
          
        }
        
@@ -546,7 +558,8 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
       int nnoise = 10;
       for (int i=0; i<nnoise; ++i) {
         for (int j=0; j<nnoise; ++j) {
-          h_vector_long_vector_noise_matrix[hashedIndex * (10*10) + 10 * i + j] = noisecov(i,j) ;
+//           h_vector_long_vector_noise_matrix[hashedIndex * (10*10) + 10 * i + j] = noisecov(i,j) ;
+          h_vector_long_vector_noise_matrix[numRechits * (10*10) + 10 * i + j] = noisecov(i,j) ;
         }
       }
       
@@ -603,11 +616,13 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
 //     static const int TEMPLATESAMPLES = 12;
     
     
-    
+    //---- FIXME
+//     numRechits = 61200;
     
     EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(
                                                       numRechits,
-                                                      h_vector_vector_pulses,                   d_vector_vector_pulses,
+                                                      h_vector_vector_pulses,                   
+                                                      d_vector_vector_pulses,
                                                       h_vector_long_vector_correlation_matrix,  d_vector_long_vector_correlation_matrix,
                                                       h_vector_long_vector_noise_matrix,        d_vector_long_vector_noise_matrix,
                                                       h_vector_vector_digis,                    d_vector_vector_digis,
@@ -615,6 +630,8 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
                                                       h_vector_chi2,                            d_vector_chi2
                                                       );
     
+    
+    numRechits = 0;
     
     for (auto itdg = digis.begin(); itdg != digis.end(); ++itdg) {
        
@@ -710,17 +727,24 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
             //                              see https://github.com/cms-sw/cmssw/blob/master/DataFormats/EcalRecHit/interface/EcalUncalibratedRecHit.h#L27-L28
             result.emplace_back((*itdg).id(), 0, 0, 0, 0);
             auto & uncalibRecHit = result.back();
-            uncalibRecHit.setAmplitude ( h_vector_vector_amplitudes [hashedIndex*10 + 5] );
+//             uncalibRecHit.setAmplitude ( h_vector_vector_amplitudes [hashedIndex*10 + 5] );
+            uncalibRecHit.setAmplitude ( h_vector_vector_amplitudes [numRechits*10 + 5] );
             
-            std::cout << "          h_vector_vector_amplitudes [" << hashedIndex << "*10 + 5] = " << h_vector_vector_amplitudes [hashedIndex*10 + 5] << std::endl;
+            
+            
+            
+//             std::cout << "          h_vector_vector_amplitudes [" << hashedIndex << "*10 + 5] = " << h_vector_vector_amplitudes [hashedIndex*10 + 5] << std::endl;
             
             //             uncalibRecHit.setAmplitudeError ( FIXME );
             //             uncalibRecHit.setPedestal ( FIXME );
-            uncalibRecHit.setChi2 ( h_vector_chi2 [hashedIndex] );
+
+            //             uncalibRecHit.setChi2 ( h_vector_chi2 [hashedIndex] );
+            uncalibRecHit.setChi2 ( h_vector_chi2 [numRechits] );
             
             for (int iBx=0; iBx<10; iBx++) {
-              uncalibRecHit.setOutOfTimeAmplitude (iBx, h_vector_vector_amplitudes[hashedIndex*10 + iBx] );
-              std::cout << "            >>>      h_vector_vector_amplitudes [" << hashedIndex << "*10 + " << iBx << "] = " << h_vector_vector_amplitudes [hashedIndex*10 + iBx] << " <<---        h_vector_vector_digis = " << h_vector_vector_digis[hashedIndex*10 + iBx] << std::endl;
+//               uncalibRecHit.setOutOfTimeAmplitude (iBx, h_vector_vector_amplitudes[hashedIndex*10 + iBx] );
+              uncalibRecHit.setOutOfTimeAmplitude (iBx, h_vector_vector_amplitudes[numRechits*10 + iBx] );
+              //               std::cout << "            >>>      h_vector_vector_amplitudes [" << hashedIndex << "*10 + " << iBx << "] = " << h_vector_vector_amplitudes [hashedIndex*10 + iBx] << " <<---        h_vector_vector_digis = " << h_vector_vector_digis[hashedIndex*10 + iBx] << std::endl;
             
               
             }
@@ -859,6 +883,8 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
 	if( ((EcalDataFrame)(*itdg)).hasSwitchToGain6()  ) uncalibRecHit.setFlagBit( EcalUncalibratedRecHit::kHasSwitchToGain6 );
 	if( ((EcalDataFrame)(*itdg)).hasSwitchToGain1()  ) uncalibRecHit.setFlagBit( EcalUncalibratedRecHit::kHasSwitchToGain1 );
 
+        numRechits++;
+        
     }
 }
 
