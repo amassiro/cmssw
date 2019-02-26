@@ -170,7 +170,7 @@ void kernel_reconstruct(
     }
     else {
       for (unsigned int iPulse=0; iPulse<multifit_fitting_NNLS.BXs().rows(); iPulse++) {
-        vector_vector_amplitudes[ idx*10 + iPulse ] = -1.; // 0.;
+        vector_vector_amplitudes[ idx*10 + iPulse ] = 0.; // -1.; // 0.;
       }
     }
     vector_chi2[idx] = multifit_fitting_NNLS.ChiSq();
@@ -220,7 +220,7 @@ void EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(
   if (numRechits<64) nthreads_per_block = numRechits;
   int nblocks = (numRechits) / nthreads_per_block + 1;
   
-  std::cout << " numRechits = " << numRechits << " --> nthreads_per_block (= " << nthreads_per_block << ") *  nblocks (=" << nblocks << ") = " << nthreads_per_block*nblocks << std::endl;
+//   std::cout << " numRechits = " << numRechits << " --> nthreads_per_block (= " << nthreads_per_block << ") *  nblocks (=" << nblocks << ") = " << nthreads_per_block*nblocks << std::endl;
   
   kernel_reconstruct <<< nblocks, nthreads_per_block >>> ( 
                                                           d_vector_vector_pulses,
@@ -244,11 +244,11 @@ void EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(
   cudaMemcpy(h_vector_chi2,              d_vector_chi2,              61200 * sizeof(float),      cudaMemcpyDeviceToHost);
   
   for (int ixtal=0; ixtal<numRechits; ixtal++){
-    std::cout << " @ EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return ~~~ ixtal = " << ixtal << std::endl;
+//     std::cout << " @ EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return ~~~ ixtal = " << ixtal << std::endl;
     for (int i=0; i<10; i++) {
-      std::cout << " ~~~ ~~~ h_vector_vector_digis[ " << ixtal*10+i << " ] = " << h_vector_vector_digis[ixtal*10+i];
-      std::cout << " ~~~ h_vector_vector_pulses = " << h_vector_vector_pulses[ixtal*12+i] ;
-      std::cout << " ~~~ >  h_vector_vector_amplitudes = " << h_vector_vector_amplitudes[ixtal*10+i] << std::endl;
+//       std::cout << " ~~~ ~~~ h_vector_vector_digis[ " << ixtal*10+i << " ] = " << h_vector_vector_digis[ixtal*10+i];
+//       std::cout << " ~~~ h_vector_vector_pulses = " << h_vector_vector_pulses[ixtal*12+i] ;
+//       std::cout << " ~~~ >  h_vector_vector_amplitudes = " << h_vector_vector_amplitudes[ixtal*10+i] << std::endl;
     }
   }
   

@@ -621,8 +621,7 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
     
     EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(
                                                       numRechits,
-                                                      h_vector_vector_pulses,                   
-                                                      d_vector_vector_pulses,
+                                                      h_vector_vector_pulses,                   d_vector_vector_pulses,
                                                       h_vector_long_vector_correlation_matrix,  d_vector_long_vector_correlation_matrix,
                                                       h_vector_long_vector_noise_matrix,        d_vector_long_vector_noise_matrix,
                                                       h_vector_vector_digis,                    d_vector_vector_digis,
@@ -645,8 +644,8 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
         const EcalPedestals::Item * aped = nullptr;
         const EcalMGPAGainRatio * aGain = nullptr;
         const EcalXtalGroupId * gid = nullptr;
-        const EcalPulseShapes::Item * aPulse = nullptr;
-        const EcalPulseCovariances::Item * aPulseCov = nullptr;
+//---- AM: not needed anymore ::::        const EcalPulseShapes::Item * aPulse = nullptr;
+//---- AM: not needed anymore ::::        const EcalPulseCovariances::Item * aPulseCov = nullptr;
         unsigned int hashedIndex = 0;
         
         if (barrel) {
@@ -654,16 +653,16 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
             aped       = &peds->barrel(hashedIndex);
             aGain      = &gains->barrel(hashedIndex);
             gid        = &grps->barrel(hashedIndex);
-            aPulse     = &pulseshapes->barrel(hashedIndex);
-            aPulseCov  = &pulsecovariances->barrel(hashedIndex);
+//---- AM: not needed anymore ::::            aPulse     = &pulseshapes->barrel(hashedIndex);
+//---- AM: not needed anymore ::::            aPulseCov  = &pulsecovariances->barrel(hashedIndex);
             offsetTime = offtime->getEBValue();
         } else {
             hashedIndex = EEDetId(detid).hashedIndex();
             aped       = &peds->endcap(hashedIndex);
             aGain      = &gains->endcap(hashedIndex);
             gid        = &grps->endcap(hashedIndex);
-            aPulse     = &pulseshapes->endcap(hashedIndex);
-            aPulseCov  = &pulsecovariances->endcap(hashedIndex);
+//---- AM: not needed anymore ::::            aPulse     = &pulseshapes->endcap(hashedIndex);
+//---- AM: not needed anymore ::::            aPulseCov  = &pulsecovariances->endcap(hashedIndex);
             offsetTime = offtime->getEEValue();
         }
 
@@ -671,12 +670,12 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
         double pedRMSVec[3]  = { aped->rms_x12,  aped->rms_x6,  aped->rms_x1 };
         double gainRatios[3] = { 1., aGain->gain12Over6(), aGain->gain6Over1()*aGain->gain12Over6()};
 
-        for (int i=0; i<EcalPulseShape::TEMPLATESAMPLES; ++i)
-            fullpulse(i+7) = aPulse->pdfval[i];
+//---- AM: not needed anymore ::::        for (int i=0; i<EcalPulseShape::TEMPLATESAMPLES; ++i)
+//---- AM: not needed anymore ::::            fullpulse(i+7) = aPulse->pdfval[i];
     
-        for(int i=0; i<EcalPulseShape::TEMPLATESAMPLES;i++)
-        for(int j=0; j<EcalPulseShape::TEMPLATESAMPLES;j++)
-            fullpulsecov(i+7,j+7) = aPulseCov->covval[i][j];
+//---- AM: not needed anymore ::::        for(int i=0; i<EcalPulseShape::TEMPLATESAMPLES;i++)
+//---- AM: not needed anymore ::::        for(int j=0; j<EcalPulseShape::TEMPLATESAMPLES;j++)
+//---- AM: not needed anymore ::::            fullpulsecov(i+7,j+7) = aPulseCov->covval[i][j];
         
 	// compute the right bin of the pulse shape using time calibration constants
 	EcalTimeCalibConstantMap::const_iterator it = itime->find( detid );
@@ -718,7 +717,7 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
             uncalibRecHit.setChi2(0);
         } else {
             // multifit
-            const SampleMatrixGainArray &noisecors = noisecor(barrel);
+//---- AM: not needed anymore ::::            const SampleMatrixGainArray &noisecors = noisecor(barrel);
             
 //             result.push_back(multiFitMethod_.makeRecHit(*itdg, aped, aGain, noisecors, fullpulse, fullpulsecov, activeBX));
             
