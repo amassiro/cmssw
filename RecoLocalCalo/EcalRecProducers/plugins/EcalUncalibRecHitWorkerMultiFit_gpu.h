@@ -37,6 +37,11 @@
 #include "RecoLocalCalo/EcalRecAlgos/interface/EigenMatrixTypes.h"
 
 
+
+#include "RecoLocalCalo/EcalRecAlgos/interface/EcalUncalibRecHitMultiFitAlgo_gpu.h"
+
+
+
 namespace edm {
         class Event;
         class EventSetup;
@@ -153,17 +158,32 @@ class EcalUncalibRecHitWorkerMultiFitGpu final : public EcalUncalibRecHitWorkerB
                 double chi2ThreshEE_;
 
                 //---- for GPU 
-                // devide variables ...
-                std::vector<float> *d_vector_digis;
-                EcalPulseShape *d_vector_pulses;
-                EcalPulseCovariance *d_vector_covariance;
-                SampleMatrix *d_vector_noisecors;
-
+                // device variables ...
+                float* d_vector_vector_digis;
+                EcalPulseShape* d_vector_pulses;
+                EcalPulseCovariance* d_vector_covariance;
+                SampleMatrix* d_vector_noisecors;
+                float* d_vector_long_vector_correlation_matrix;
+                float* d_vector_long_vector_noise_matrix;
+                float* d_vector_vector_pulses;
+                
+                // device outputs
+                float* d_vector_vector_amplitudes; //---- 10 amplitudes
+                float* d_vector_chi2;
+                
+                
                 // ... and the same variables but for the host
-                std::vector<float> *h_vector_digis;
-                EcalPulseShape *h_vector_pulses;
-                EcalPulseCovariance *h_vector_covariance;
-                SampleMatrix *h_vector_noisecors;
+                float* h_vector_vector_digis;
+                EcalPulseShape* h_vector_pulses;
+                EcalPulseCovariance* h_vector_covariance;
+                SampleMatrix* h_vector_noisecors;
+                float* h_vector_long_vector_correlation_matrix;
+                float* h_vector_long_vector_noise_matrix;
+                float* h_vector_vector_pulses;
+                
+                // host outputs
+                float* h_vector_vector_amplitudes; //---- 10 amplitudes
+                float* h_vector_chi2;
                 
 
 };

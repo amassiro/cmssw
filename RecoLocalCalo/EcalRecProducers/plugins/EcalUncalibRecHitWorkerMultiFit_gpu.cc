@@ -121,12 +121,41 @@ EcalUncalibRecHitWorkerMultiFitGpu::EcalUncalibRecHitWorkerMultiFitGpu(const edm
   //
   //
     
-  cudaMalloc((void**)&d_vector_digis,      61200 * sizeof(std::vector<float>::value_type));
-  cudaMalloc((void**)&d_vector_pulses,     61200 * sizeof(EcalPulseShape));
-  cudaMalloc((void**)&d_vector_covariance, 61200 * sizeof(EcalPulseCovariance));
-  cudaMalloc((void**)&d_vector_noisecors,  61200 * sizeof(SampleMatrix));
+//   cudaMalloc((void**)&d_vector_digis,      61200 * sizeof(std::vector<float>::value_type));
+  cudaMalloc((void**)&d_vector_vector_digis,   61200 * 10 * sizeof(float));
+  cudaMalloc((void**)&d_vector_pulses,         61200 * sizeof(EcalPulseShape));
+  cudaMalloc((void**)&d_vector_covariance,     61200 * sizeof(EcalPulseCovariance));
+  cudaMalloc((void**)&d_vector_noisecors,      61200 * sizeof(SampleMatrix));
   
-  h_vector_digis = new std::vector<float> [61200];  // on the host
+//   cudaMalloc((void**)&d_vector_amplitudes,      61200 * sizeof(std::vector<float>));
+  cudaMalloc((void**)&d_vector_vector_amplitudes,      61200 * 10 * sizeof(float));
+  cudaMalloc((void**)&d_vector_chi2,                   61200 * sizeof(float));
+  
+
+
+  h_vector_vector_digis = new float [10 * 61200];  // on the host
+
+  h_vector_vector_amplitudes = new float [10 * 61200];  // on the host
+  h_vector_chi2 = new float [61200];  // on the host
+  
+  
+  
+  
+  
+  
+  
+  //---- noise matrix, covariance matrix and pulses matrix
+  
+  cudaMalloc((void**)&d_vector_long_vector_correlation_matrix,   61200 * EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES * sizeof(float));
+  cudaMalloc((void**)&d_vector_long_vector_noise_matrix,         61200 * 10*10 * sizeof(float));
+  cudaMalloc((void**)&d_vector_vector_pulses,                    61200 * EcalPulseShape::TEMPLATESAMPLES    * sizeof(float));
+  
+  h_vector_long_vector_correlation_matrix = new float [EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES * 61200];  // on the host
+  h_vector_long_vector_noise_matrix       = new float [10*10 * 61200];  // on the host
+  h_vector_vector_pulses                  = new float [EcalPulseShape::TEMPLATESAMPLES    * 61200];  // on the host
+  
+  
+//   EcalPulseShape::TEMPLATESAMPLES = 12
   
   
 //
@@ -143,10 +172,27 @@ EcalUncalibRecHitWorkerMultiFitGpu::EcalUncalibRecHitWorkerMultiFitGpu(const edm
 
 EcalUncalibRecHitWorkerMultiFitGpu::~EcalUncalibRecHitWorkerMultiFitGpu() {
   
-  cudaFree(d_vector_digis);
+  cudaFree(d_vector_vector_digis);
   cudaFree(d_vector_pulses);
   cudaFree(d_vector_covariance);
   cudaFree(d_vector_noisecors);
+
+  cudaFree(d_vector_long_vector_correlation_matrix);
+  cudaFree(d_vector_long_vector_noise_matrix);
+  cudaFree(d_vector_vector_pulses);
+  
+  cudaFree(d_vector_vector_amplitudes);
+  cudaFree(d_vector_chi2);
+  
+  
+  //  delete h_vector_long_vector_correlation_matrix ;
+  //  delete h_vector_long_vector_noise_matrix       ;
+  //  delete h_vector_vector_pulses                  ;
+  //  
+  //  delete h_vector_vector_digis ;
+  //  
+  //  delete h_vector_vector_amplitudes ;
+  //  delete h_vector_chi2              ;
   
 }
 
@@ -198,6 +244,7 @@ EcalUncalibRecHitWorkerMultiFitGpu::set(const edm::EventSetup& es)
             noisecorEEg1(i,j)  = noisecovariances->EEG1SamplesCorrelation[vidx];
           }
 	}
+
 }
 
 void
@@ -335,54 +382,242 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
     //---- NO cleaning! It is useless. You will overwrite the new pulses, only the ones available and copy on the device all of them.
     // then the multifit code will be run only on the useful channels
     
+    int numRechits = 0;
+    //   EcalDigiCollection::const_iterator
     for (auto itdg = digis.begin(); itdg != digis.end(); ++itdg) {
       
       //---- need to get pedestal information
       DetId detid(itdg->id());
+      
       const EcalPedestals::Item * aped = nullptr;
+      const EcalMGPAGainRatio * aGain = nullptr;
+      
       unsigned int hashedIndex = 0;
+      
+      const EcalPulseShapes::Item * aPulse = nullptr;
+      const EcalPulseCovariances::Item * aPulseCov = nullptr;
+      
       
       if (barrel) {
         hashedIndex = EBDetId(detid).hashedIndex();
         aped       = &peds->barrel(hashedIndex);
+        aGain      = &gains->barrel(hashedIndex);
+        aPulse     = &pulseshapes->barrel(hashedIndex);
+        aPulseCov  = &pulsecovariances->barrel(hashedIndex);
+        
       } else {
         hashedIndex = EEDetId(detid).hashedIndex();
         aped       = &peds->endcap(hashedIndex);
+        aGain      = &gains->endcap(hashedIndex);
+        aPulse     = &pulseshapes->endcap(hashedIndex);
+        aPulseCov  = &pulsecovariances->endcap(hashedIndex);
+      }
+       
+       
+      
+      //----                                        12
+      for (int iSample=0; iSample<EcalPulseShape::TEMPLATESAMPLES; iSample++) {
+        h_vector_vector_pulses[hashedIndex*EcalPulseShape::TEMPLATESAMPLES+iSample] = ((float) aPulse->pdfval[iSample] );
       }
       
-      float pedestal = aped->mean_x12;
-      //---- only gain 12 run multifit!!
+      //---- FIXME: fill h_vector_long_vector_correlation_matrix and h_vector_long_vector_noise_matrix
+      //
       
-      std::vector<float> digi_adc_pedestal_subtracted;
-      for (int iSample=0; iSample<EcalDataFrame::MAXSAMPLES; iSample++) {
-        digi_adc_pedestal_subtracted.push_back ((float) (((EcalDataFrame)(*itdg)).sample(iSample).adc()) - pedestal); 
+      for(int i=0; i<EcalPulseShape::TEMPLATESAMPLES;i++) {
+        for(int j=0; j<EcalPulseShape::TEMPLATESAMPLES;j++) {
+          h_vector_long_vector_correlation_matrix [hashedIndex * (EcalPulseShape::TEMPLATESAMPLES*EcalPulseShape::TEMPLATESAMPLES) + EcalPulseShape::TEMPLATESAMPLES * i + j] =  aPulseCov->covval[i][j];
+//           fullpulsecov(i+7,j+7) = aPulseCov->covval[i][j];
+        }
       }
-      h_vector_digis[hashedIndex] = digi_adc_pedestal_subtracted;
+        
+        
+//       h_vector_long_vector_correlation_matrix
+//       
+//       
+      
+//       https://github.com/cms-sw/cmssw/blob/02d4198c0b6615287fd88e9a8ff650aea994412e/RecoLocalCalo/EcalRecAlgos/interface/EigenMatrixTypes.h
+//       constexpr int SampleVectorSize = 10;
+//       typedef Eigen::Matrix<double,SampleVectorSize,1> SampleVector;
+// 
+
+
+       float pedestal = 0; // aped->mean_x12;
+       //---- only gain 12 run multifit (in EB).
+       // FIXME : do the same also in EE?
+       //         has slew rate been checked in EE?
+       //
+    
+
+
+       
+       //compute noise covariance matrix, which depends on the sample gains
+       SampleMatrix noisecov;
+       
+       //---- FIXME check if really needed
+       SampleGainVector gainsNoise;
+       const unsigned int iSampleMax = 5;
+       bool dynamicPedestal = false;
+       //----
+       
+       
+       //                                          10
+       for (int iSample=0; iSample<EcalDataFrame::MAXSAMPLES; iSample++) {
+      
+         float pedestal = 0.;
+
+         const EcalMGPASample &sample = ((EcalDataFrame) *itdg).sample(iSample);
+         int gainId = sample.gainId();
+         
+//          float gainratio = 1.;
+         
+         if (gainId==0 || gainId==3) {
+           pedestal = aped->mean_x1;
+//            gainratio = aGain->gain6Over1()*aGain->gain12Over6();
+           gainsNoise[iSample] = 2;
+//            gainsPedestal[iSample] = dynamicPedestal ? 2 : -1;  //-1 for static pedestal
+         }
+         else if (gainId==1) {
+           pedestal = aped->mean_x12;
+//            gainratio = 1.;
+           gainsNoise[iSample] = 0;
+//            gainsPedestal[iSample] = dynamicPedestal ? 0 : -1; //-1 for static pedestal
+         }
+         else if (gainId==2) {
+           pedestal = aped->mean_x6;
+//            gainratio = aGain->gain12Over6();
+           gainsNoise[iSample] = 1;
+//            gainsPedestal[iSample] = dynamicPedestal ? 1 : -1; //-1 for static pedestals
+         }
+         
+         //---- fill the digis
+         h_vector_vector_digis[hashedIndex*10+iSample] = ((float) (((EcalDataFrame)(*itdg)).sample(iSample).adc()) - pedestal);
+         
+       }
+       
+           
+       
+       bool hasSaturation = ((EcalDataFrame) *itdg).isSaturated();
+       bool hasGainSwitch = hasSaturation || ((EcalDataFrame) *itdg).hasSwitchToGain6() || ((EcalDataFrame) *itdg).hasSwitchToGain1();
+
+       const SampleMatrixGainArray &noisecors = noisecor(barrel);
+       
+       bool _simplifiedNoiseModelForGainSwitch = false;
+       float _addPedestalUncertainty = 0.0;
+
+       
+       if (hasGainSwitch) {
+         std::array<double,3> pedrmss = {{aped->rms_x12, aped->rms_x6, aped->rms_x1}};
+         std::array<double,3> gainratios = {{ 1., aGain->gain12Over6(), aGain->gain6Over1()*aGain->gain12Over6()}};
+         if (_simplifiedNoiseModelForGainSwitch) {
+           int gainidxmax = gainsNoise[iSampleMax];
+           noisecov = gainratios[gainidxmax]*gainratios[gainidxmax]*pedrmss[gainidxmax]*pedrmss[gainidxmax]*noisecors[gainidxmax];
+           if (!dynamicPedestal && _addPedestalUncertainty>0.) {
+             //add fully correlated component to noise covariance to inflate pedestal uncertainty
+             noisecov += _addPedestalUncertainty*_addPedestalUncertainty*SampleMatrix::Ones();
+           }
+         }
+         else {
+           noisecov = SampleMatrix::Zero();
+           for (unsigned int gainidx=0; gainidx<noisecors.size(); ++gainidx) {
+             SampleGainVector mask = gainidx*SampleGainVector::Ones();
+             SampleVector pedestal = (gainsNoise.array()==mask.array()).cast<SampleVector::value_type>();
+             if (pedestal.maxCoeff()>0.) {
+               //select out relevant components of each correlation matrix, and assume no correlation between samples with
+               //different gain
+               noisecov += gainratios[gainidx]*gainratios[gainidx]*pedrmss[gainidx]*pedrmss[gainidx]*pedestal.asDiagonal()*noisecors[gainidx]*pedestal.asDiagonal();
+               if (!dynamicPedestal && _addPedestalUncertainty>0.) {
+                 //add fully correlated component to noise covariance to inflate pedestal uncertainty
+                 noisecov += gainratios[gainidx]*gainratios[gainidx]*_addPedestalUncertainty*_addPedestalUncertainty*pedestal.asDiagonal()*SampleMatrix::Ones()*pedestal.asDiagonal();
+               }
+             }
+           }
+         }
+       }
+       else {
+         noisecov = aped->rms_x12*aped->rms_x12*noisecors[0];
+         if (!dynamicPedestal && _addPedestalUncertainty>0.) {
+           //add fully correlated component to noise covariance to inflate pedestal uncertainty
+           noisecov += _addPedestalUncertainty*_addPedestalUncertainty*SampleMatrix::Ones();
+         }
+       }
+       
+       
+      //---- now finally dump the correlation matrix for the noise
+      int nnoise = 10;
+      for (int i=0; i<nnoise; ++i) {
+        for (int j=0; j<nnoise; ++j) {
+          h_vector_long_vector_noise_matrix[hashedIndex * (10*10) + 10 * i + j] = noisecov(i,j) ;
+        }
+      }
+      
+      
+
+      //
+      //
+      //
+      
+      numRechits++;
+      
     }
+    
+    
+    //---- prepare all the conditions and ship over GPU 
+    
+//     void EcalUncalibRecHitMultiFitAlgo_gpu_copy_conditions (
+//                                     float& h_vector_long_vector_correlation_matrix,
+//                                     float& h_vector_long_vector_noise_matrix
+//          );
+    
+    
+    
+    
+    
     //---- then copy on device
-    // FIXME
+    //
     //---- then send all the multifits execution commands on the device
-    // FIXME
+    //
     //---- wait that all the threads are done ... wait ...
     //---- in order words, synchronize
-    // FIXME
+    //
     //---- now copy back from device to host the results of the multifit
     //---- and then you can access directly to the outputs of the local reconstruction, namely:
     //----    all amplitudes (in time and out-of-time, chi2, ...
     //
-    // FIXME
     //
     // all these steps done in one single function, since this is *not* cuda coda
     // and all the cuda code is in a class.
     // this class, EcalUncalibRecHitMultiFitAlgo_gpu, will take all the inputs,
     // call the gpu kernel, synchronize, get the output and store them on the host
     //
-//     EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(h_vector_digis, d_vector_digis);
+//     EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return_test(
+//                                                       *h_vector_vector_digis,      *d_vector_vector_digis,
+//                                                       *h_vector_vector_amplitudes, *d_vector_vector_amplitudes,
+//                                                       *h_vector_chi2,       *d_vector_chi2
+//                                                       );
     
     
     
-    for (auto itdg = digis.begin(); itdg != digis.end(); ++itdg)
-    {
+    
+//     
+//     std::cout << " EcalPulseShape::TEMPLATESAMPLES = " << EcalPulseShape::TEMPLATESAMPLES << std::endl;
+//     static const int TEMPLATESAMPLES = 12;
+    
+    
+    
+    
+    EcalUncalibRecHitMultiFitAlgo_gpu_copy_run_return(
+                                                      numRechits,
+                                                      h_vector_vector_pulses,                   d_vector_vector_pulses,
+                                                      h_vector_long_vector_correlation_matrix,  d_vector_long_vector_correlation_matrix,
+                                                      h_vector_long_vector_noise_matrix,        d_vector_long_vector_noise_matrix,
+                                                      h_vector_vector_digis,                    d_vector_vector_digis,
+                                                      h_vector_vector_amplitudes,               d_vector_vector_amplitudes,
+                                                      h_vector_chi2,                            d_vector_chi2
+                                                      );
+    
+    
+    for (auto itdg = digis.begin(); itdg != digis.end(); ++itdg) {
+       
         DetId detid(itdg->id());
 
         const EcalSampleMask *sampleMask_ = sampleMaskHand_.product();                
@@ -395,9 +630,10 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
         const EcalXtalGroupId * gid = nullptr;
         const EcalPulseShapes::Item * aPulse = nullptr;
         const EcalPulseCovariances::Item * aPulseCov = nullptr;
- 
+        unsigned int hashedIndex = 0;
+        
         if (barrel) {
-            unsigned int hashedIndex = EBDetId(detid).hashedIndex();
+            hashedIndex = EBDetId(detid).hashedIndex();
             aped       = &peds->barrel(hashedIndex);
             aGain      = &gains->barrel(hashedIndex);
             gid        = &grps->barrel(hashedIndex);
@@ -405,7 +641,7 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
             aPulseCov  = &pulsecovariances->barrel(hashedIndex);
             offsetTime = offtime->getEBValue();
         } else {
-            unsigned int hashedIndex = EEDetId(detid).hashedIndex();
+            hashedIndex = EEDetId(detid).hashedIndex();
             aped       = &peds->endcap(hashedIndex);
             aGain      = &gains->endcap(hashedIndex);
             gid        = &grps->endcap(hashedIndex);
@@ -467,9 +703,36 @@ EcalUncalibRecHitWorkerMultiFitGpu::run( const edm::Event & evt,
             // multifit
             const SampleMatrixGainArray &noisecors = noisecor(barrel);
             
-            result.push_back(multiFitMethod_.makeRecHit(*itdg, aped, aGain, noisecors, fullpulse, fullpulsecov, activeBX));
-            auto & uncalibRecHit = result.back();
+//             result.push_back(multiFitMethod_.makeRecHit(*itdg, aped, aGain, noisecors, fullpulse, fullpulsecov, activeBX));
             
+            //---- here no need to run multifit: get directly the results from the fit performed on GPU 
+            //                              amp, ped, jit, chi2  ---> default here set to 0 all of them
+            //                              see https://github.com/cms-sw/cmssw/blob/master/DataFormats/EcalRecHit/interface/EcalUncalibratedRecHit.h#L27-L28
+            result.emplace_back((*itdg).id(), 0, 0, 0, 0);
+            auto & uncalibRecHit = result.back();
+            uncalibRecHit.setAmplitude ( h_vector_vector_amplitudes [hashedIndex*10 + 5] );
+            
+            std::cout << "          h_vector_vector_amplitudes [" << hashedIndex << "*10 + 5] = " << h_vector_vector_amplitudes [hashedIndex*10 + 5] << std::endl;
+            
+            //             uncalibRecHit.setAmplitudeError ( FIXME );
+            //             uncalibRecHit.setPedestal ( FIXME );
+            uncalibRecHit.setChi2 ( h_vector_chi2 [hashedIndex] );
+            
+            for (int iBx=0; iBx<10; iBx++) {
+              uncalibRecHit.setOutOfTimeAmplitude (iBx, h_vector_vector_amplitudes[hashedIndex*10 + iBx] );
+              std::cout << "            >>>      h_vector_vector_amplitudes [" << hashedIndex << "*10 + " << iBx << "] = " << h_vector_vector_amplitudes [hashedIndex*10 + iBx] << " <<---        h_vector_vector_digis = " << h_vector_vector_digis[hashedIndex*10 + iBx] << std::endl;
+            
+              
+            }
+              
+//               void setJitterError( float jitterErr );
+//               void setFlags( uint32_t flags ) { flags_ = flags; }
+//               void setId( DetId id ) { id_ = id; }
+//               void setAux( uint32_t aux ) { aux_ = aux; }
+//               void setFlagBit(Flags flag);
+//               bool checkFlag(Flags flag) const;
+              
+           
             // === time computation ===
             if (timealgo_ == ratioMethod) {
                 // ratio method
