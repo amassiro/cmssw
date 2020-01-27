@@ -31,11 +31,11 @@ EcalChannelStatusGPU::Product const& EcalChannelStatusGPU::getProduct(cuda::stre
       [this](EcalChannelStatusGPU::Product& product, cuda::stream_t<>& cudaStream) {
           // malloc
           cudaCheck( cudaMalloc((void**)&product.status,
-                                this->status_.size() * sizeof(uint32_t)) );
+                                this->status_.size() * sizeof(uint16_t)) );
           // transfer 
           cudaCheck( cudaMemcpyAsync(product.status,
                                      this->status_.data(),
-                                     this->status_.size() * sizeof(uint32_t),
+                                     this->status_.size() * sizeof(uint16_t),
                                      cudaMemcpyHostToDevice,
                                      cudaStream.id()) );
       }

@@ -33,14 +33,11 @@ EcalRecHitWorkerSimple::EcalRecHitWorkerSimple(const edm::ParameterSet&ps, edm::
 	v_DB_reco_flags_.resize(32); 
 
 	for (unsigned int i=0;i!=recoflagbitsStrings.size();++i){
-	  EcalRecHit::Flags recoflagbit = (EcalRecHit::Flags)
-	    StringToEnumValue<EcalRecHit::Flags>(recoflagbitsStrings[i]);
-	  std::vector<std::string> dbstatus_s =  
-	    p.getParameter<std::vector<std::string> >(recoflagbitsStrings[i]);
+	  EcalRecHit::Flags recoflagbit = (EcalRecHit::Flags) StringToEnumValue<EcalRecHit::Flags>(recoflagbitsStrings[i]);
+	  std::vector<std::string> dbstatus_s = p.getParameter<std::vector<std::string> >(recoflagbitsStrings[i]);
 	  std::vector<uint32_t> dbstatuses;
 	  for (unsigned int j=0; j!= dbstatus_s.size(); ++j){
-	    EcalChannelStatusCode::Code  dbstatus  = (EcalChannelStatusCode::Code)
-	      StringToEnumValue<EcalChannelStatusCode::Code>(dbstatus_s[j]);
+	    EcalChannelStatusCode::Code  dbstatus  = (EcalChannelStatusCode::Code) StringToEnumValue<EcalChannelStatusCode::Code>(dbstatus_s[j]);
 	    dbstatuses.push_back(dbstatus);
 	  }
 
@@ -87,12 +84,20 @@ EcalRecHitWorkerSimple::run( const edm::Event & evt,
         
         std::vector<int>::const_iterator res = 
 		    std::find( v_chstatus_.begin(), v_chstatus_.end(), dbstatus );
-        if ( res != v_chstatus_.end() ) return false;
-        
+        if ( res != v_chstatus_.end() ) {
+//           std::cout << " killed @ CPU " << detid.rawId() << " -->  res = " << *res << std::endl ; 
+          return false;
+        }
     }
 
 	uint32_t flagBits = setFlagBits(v_DB_reco_flags_, dbstatus);
 
+        //
+        // AM FIXME: this is just a TEST
+//         flagBits = 0;
+        //
+        
+        
 	float offsetTime = 0; // the global time phase
 	const EcalIntercalibConstantMap& icalMap = ical->getMap();  
     if ( detid.subdetId() == EcalEndcap ) {
@@ -144,10 +149,14 @@ EcalRecHitWorkerSimple::run( const edm::Event & evt,
                                                       /*recoflags_ 0*/ 
                                                       flagBits) );
 	
+        //
+        //---- AM FIXME Commented just for test, then it will be fixed   (4 lines below here)
+        //
         if (detid.subdetId() == EcalBarrel && (lasercalib < EBLaserMIN_ || lasercalib > EBLaserMAX_)) 
             myrechit.setFlag(EcalRecHit::kPoorCalib);
         if (detid.subdetId() == EcalEndcap && (lasercalib < EELaserMIN_ || lasercalib > EELaserMAX_)) 
             myrechit.setFlag(EcalRecHit::kPoorCalib);
+        
         result.push_back(myrechit);
 	}
 
@@ -157,6 +166,12 @@ EcalRecHitWorkerSimple::run( const edm::Event & evt,
 // Take our association map of dbstatuses-> recHit flagbits and return the apporpriate flagbit word
 uint32_t EcalRecHitWorkerSimple::setFlagBits(const std::vector<std::vector<uint32_t> >& map, 
 					     const uint32_t& status  ){
+  
+//   return status;
+  
+  //---- AM FIXME : this is just a TEST
+//   return 0;
+  //----
   
   for (unsigned int i = 0; i!=map.size(); ++i){
     if (std::find(map[i].begin(), map[i].end(),status)!= map[i].end()) 

@@ -113,7 +113,7 @@ private:
   
   // Associate reco flagbit ( outer vector) to many db status flags (inner vector)
 //   std::vector<std::vector<uint32_t> > v_DB_reco_flags_;
-  std::vector<uint32_t> expanded_v_DB_reco_flags_;         // Transform a map in a vector
+  std::vector<int> expanded_v_DB_reco_flags_;              // Transform a map in a vector      // FIXME AM: int or uint32 to be checked
   std::vector<uint32_t> expanded_Sizes_v_DB_reco_flags_;   // Saving the size for each piece
   std::vector<uint32_t> expanded_flagbit_v_DB_reco_flags_; // And the "key" for each key
   
@@ -137,6 +137,13 @@ void EcalRecHitProducerGPU::fillDescriptions(
   desc.add<std::string>("recHitsLabelEB", "EcalRecHitsGPUEB");
   desc.add<std::string>("recHitsLabelEE", "EcalRecHitsGPUEE");
 
+  desc.add<bool>("killDeadChannels", true);
+  
+  desc.add<double>("EBLaserMIN", 0.01);
+  desc.add<double>("EELaserMIN", 0.01);
+  desc.add<double>("EBLaserMAX", 30.0);
+  desc.add<double>("EELaserMAX", 30.0);
+  
   desc.add<uint32_t>("maxNumberHits", 20000);
 
   // ## db statuses to be exluded from reconstruction (some will be recovered)
@@ -177,6 +184,11 @@ EcalRecHitProducerGPU::EcalRecHitProducerGPU(const edm::ParameterSet& ps)   {
   bool killDeadChannels = ps.getParameter<bool>("killDeadChannels");
   configParameters_.killDeadChannels = killDeadChannels;
   
+  
+  configParameters_.EBLaserMIN = ps.getParameter<double>("EBLaserMIN");
+  configParameters_.EELaserMIN = ps.getParameter<double>("EELaserMIN");
+  configParameters_.EBLaserMAX = ps.getParameter<double>("EBLaserMAX");
+  configParameters_.EELaserMAX = ps.getParameter<double>("EELaserMAX");
   
   
   // max number of digis to allocate for
@@ -225,12 +237,12 @@ EcalRecHitProducerGPU::EcalRecHitProducerGPU(const edm::ParameterSet& ps)   {
   
   // actual values
   cudaCheck( cudaMalloc((void**)&configParameters_.expanded_v_DB_reco_flags, 
-                        sizeof(uint32_t) * expanded_v_DB_reco_flags_.size()) 
+                        sizeof(int) * expanded_v_DB_reco_flags_.size()) 
   );
   
   cudaCheck( cudaMemcpy(configParameters_.expanded_v_DB_reco_flags, 
                         expanded_v_DB_reco_flags_.data(),
-                        expanded_v_DB_reco_flags_.size() * sizeof(uint32_t),
+                        expanded_v_DB_reco_flags_.size() * sizeof(int),
                         cudaMemcpyHostToDevice) 
   );
   
@@ -409,9 +421,9 @@ void EcalRecHitProducerGPU::produce(
   eeRecHits.chi2     += neb_;
   eeRecHits.did      += neb_;
   eeRecHits.time     += neb_;
-  eeRecHits.flagBits += neb_;
   eeRecHits.extra    += neb_;
- 
+  eeRecHits.flagBits += neb_;
+  
   // put into the event
   ctx.emplace(event, recHitsTokenEB_, std::move(ebRecHits));
   ctx.emplace(event, recHitsTokenEE_, std::move(eeRecHits));

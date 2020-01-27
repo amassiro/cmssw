@@ -246,6 +246,27 @@ float EcalLaserDbService::getLaserCorrection (DetId const & xid, edm::Timestamp 
   if ( apdpnref != 0 && (t_i - t_f) != 0 && (lt_i - lt_f) != 0) {
     long long tt = t; // never subtract two unsigned!
     float interpolatedLaserResponse = p_i/apdpnref + float(tt-t_i)*(p_f-p_i)/(apdpnref*float(t_f-t_i)); 
+//     float interpolatedLaserResponse = iLM+10 ; p_f*=2; p_i*=2;
+//     float interpolatedLaserResponse =   iLM+float(t_f - t_i)+float(tt - t_i); p_f*=2; p_i*=2;
+// float interpolatedLaserResponse =   iLM+float(t_f - t_i)+float(tt - t_i)+apdpnref+alpha+100; p_f*=2; p_i*=2;
+// float interpolatedLaserResponse =   iLM+float(t_f - t_i)+float(tt - t_i)+apdpnref+alpha+100+p_i; p_f*=2; p_i*=2;
+// float interpolatedLaserResponse =   p_i+apdpnref; p_f*=2; p_i*=2;
+// float interpolatedLaserResponse =   apdpnref; p_f*=2; p_i*=2;
+// float interpolatedLaserResponse =   p_i; p_f*=2; p_i*=2; // bad
+// float interpolatedLaserResponse =   iLM; p_f*=2; p_i*=2; // bad
+// float interpolatedLaserResponse =   xid.rawId()/1000000000.; p_f*=2; p_i*=2; // good
+// std::cout << " xid.rawId() = " << xid.rawId()/1000000000. << std::endl;
+// float interpolatedLaserResponse =   iLM; p_f*=2; p_i*=2; // bad
+// float interpolatedLaserResponse =   tt/6589055619675208704.; p_f*=2; p_i*=2; 
+// std::cout << " tt = " << tt/6589055619675208704. << std::endl;
+// float interpolatedLaserResponse =   1.+float(tt-t_i)*(p_f-p_i)/(apdpnref*float(t_f-t_i)); p_f*=2; p_i*=2;
+// std::cout << " float(tt-t_i)*(p_f-p_i)/(apdpnref*float(t_f-t_i)) = " << float(tt-t_i)*(p_f-p_i)/(apdpnref*float(t_f-t_i)) << std::endl;
+
+// std::cout << " apdpnref = " << apdpnref << std::endl;
+// std::cout << " p_i = " << p_i << std::endl;
+
+
+
     float interpolatedLinearResponse = lp_i/apdpnref + float(tt-lt_i)*(lp_f-lp_i)/(apdpnref*float(lt_f-lt_i)); // FIXED BY FC
     
     if(interpolatedLinearResponse >2.f || interpolatedLinearResponse <0.1f) 
@@ -267,6 +288,16 @@ float EcalLaserDbService::getLaserCorrection (DetId const & xid, edm::Timestamp 
       float interpolatedTransparencyResponse = interpolatedLaserResponse / interpolatedLinearResponse;
 
       correctionFactor =  1.f/( std::pow(interpolatedTransparencyResponse,alpha) *interpolatedLinearResponse  );
+      
+//       alpha *= 2;
+//       
+//       correctionFactor =  interpolatedTransparencyResponse;
+//       
+//       correctionFactor = 10.;
+//       
+//       correctionFactor = interpolatedLaserResponse;
+
+//       correctionFactor = interpolatedLinearResponse; // this is ok
       
     }
     

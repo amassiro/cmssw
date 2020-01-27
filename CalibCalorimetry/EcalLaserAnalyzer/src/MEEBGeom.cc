@@ -125,6 +125,10 @@ MEEBGeom::lmr( EBGlobalCoord ieta, EBGlobalCoord iphi )
   int iside = side( ieta, iphi );
   int ilmr = 1 + 2*(ism-1) + iside;
   return ilmr;
+//   return ieta;
+//   return iphi;
+//   return idcc;
+//   return iside;
 }
 
 std::pair< MEEBGeom::EBLocalCoord, MEEBGeom::EBLocalCoord >    

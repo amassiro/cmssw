@@ -30,7 +30,8 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_HLT_v2', '')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    #input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # load data using the DAQ source
@@ -58,12 +59,18 @@ process.load("RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi")
 
 # for validation of gpu multifit products
 process.load("RecoLocalCalo.EcalRecProducers.ecalCPUUncalibRecHitProducer_cfi")
+#
+# ../cfipython/slc7_amd64_gcc700/RecoLocalCalo/EcalRecProducers/ecalCPUUncalibRecHitProducer_cfi.py
+#
 
 process.load("EventFilter.EcalRawToDigi.ecalRawToDigiGPU_cfi")
 process.load("EventFilter.EcalRawToDigi.ecalElectronicsMappingGPUESProducer_cfi")
 
 #process.ecalUncalibRecHitProducerGPU.kernelsVersion = 0
 #process.ecalUncalibRecHitProducerGPU.kernelMinimizeThreads = cms.vuint32(16, 1, 1)
+#
+# process.ecalUncalibRecHitProducerGPU.shouldRunTimingComputation = cms.bool(False)
+#
 
 
 process.load("RecoLocalCalo.EcalRecProducers.ecalPedestalsGPUESProducer_cfi")
@@ -85,7 +92,7 @@ process.ecalMultiFitUncalibRecHit.algoPSet = cms.PSet(
       ebSpikeThreshold = cms.double( 1.042 ),
       EBtimeFitLimits_Upper = cms.double( 1.4 ),
       EEtimeFitLimits_Lower = cms.double( 0.2 ),
-      timealgo = cms.string( "None" ),
+      timealgo = cms.string( "None" ),   # ----> no timing computation for CPU version
       EBtimeNconst = cms.double( 28.5 ),
       prefitMaxChiSqEE = cms.double( 10.0 ),
       outOfTimeThresholdGain12mEB = cms.double( 5.0 ),
@@ -172,7 +179,7 @@ process.ecalDigis.InputLabel = cms.InputTag('rawDataCollector')
 
 process.out = cms.OutputModule(
     "PoolOutputModule",
-    fileName = cms.untracked.string("test.root")
+    fileName = cms.untracked.string("test_uncalib.root")
 )
 
 #process.out = cms.OutputModule("AsciiOutputModule",

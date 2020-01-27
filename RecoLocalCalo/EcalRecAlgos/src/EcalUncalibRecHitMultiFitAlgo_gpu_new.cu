@@ -27,6 +27,18 @@
 
 namespace ecal { namespace multifit {
    
+
+//   enum UncalibRecHitFlags {
+//     kGood=-1,                 // channel is good (mutually exclusive with other states)  setFlagBit(kGood) reset flags_ to zero 
+//     kPoorReco,                // channel has been badly reconstructed (e.g. bad shape, bad chi2 etc.)
+//     kSaturated,               // saturated channel
+//     kOutOfTime,               // channel out of time
+//     kLeadingEdgeRecovered,    // saturated channel: energy estimated from the leading edge before saturation
+//     kHasSwitchToGain6,        // at least one data frame is in G6
+//     kHasSwitchToGain1         // at least one data frame is in G1
+//   };
+ 
+  
 void entryPoint(
         EventInputDataGPU const& eventInputGPU,
         EventOutputDataGPU& eventOutputGPU, EventDataForScratchGPU& scratch,

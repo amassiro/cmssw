@@ -58,6 +58,9 @@ EcalUncalibRecHitConvertGPU2CPUFormat::EcalUncalibRecHitConvertGPU2CPUFormat(
     , recHitsLabelCPUEB_{ps.getParameter<std::string>("recHitsLabelCPUEB")}
     , recHitsLabelCPUEE_{ps.getParameter<std::string>("recHitsLabelCPUEE")}
 {
+//   
+//   DataFormats/EcalRecHit/interface/EcalRecHitCollections.h
+//   
     produces<EBUncalibratedRecHitCollection>(recHitsLabelCPUEB_);
     produces<EEUncalibratedRecHitCollection>(recHitsLabelCPUEE_);
 }

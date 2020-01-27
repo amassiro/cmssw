@@ -30,7 +30,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_HLT_v2', '')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # load data using the DAQ source
@@ -174,7 +174,69 @@ process.load("RecoLocalCalo.EcalRecProducers.ecalLinearCorrectionsGPUESProducer_
 
 process.load("RecoLocalCalo.EcalRecProducers.ecalRecHitGPU_cfi")
 process.ecalRecHitProducerGPU = process.ecalRecHitGPU.clone()
-    
+ 
+ 
+#
+# AM : TEST to see if the number of rechits matches
+#
+#process.ecalRecHit.killDeadChannels = cms.bool(False)
+#
+#process.ecalRecHit.recoverEBFE = cms.bool(False)
+#process.ecalRecHit.recoverEBIsolatedChannels = cms.bool(False)
+#process.ecalRecHit.recoverEBVFE = cms.bool(False)
+#
+#process.ecalRecHit.recoverEEFE = cms.bool(False)
+#process.ecalRecHit.recoverEEIsolatedChannels = cms.bool(False)
+#process.ecalRecHit.recoverEEVFE = cms.bool(False)
+#
+#process.ecalRecHit.skipTimeCalib = cms.bool(True)
+#
+#process.ecalRecHitProducerGPU.killDeadChannels = cms.bool(False)
+#
+#
+#
+# TEST
+#
+#process.ecalRecHit.ChannelStatusToBeExcluded = cms.vstring( 
+                                                          #'kDAC', 
+                                                          #'kNoisy', 
+                                                          #'kNNoisy', 
+                                                          #'kFixedG6', 
+                                                          #'kFixedG1', 
+                                                          #'kFixedG0', 
+                                                          #'kNonRespondingIsolated',
+                                                          #'kDeadVFE', 
+                                                          #'kDeadFE', 
+                                                          #'kNoDataNoTP'
+                                                          #)
+#process.ecalRecHitProducerGPU.ChannelStatusToBeExcluded = cms.vstring(
+                                                          #'kDAC', 
+                                                          #'kNoisy', 
+                                                          #'kNNoisy', 
+                                                          #'kFixedG6', 
+                                                          #'kFixedG1', 
+                                                          #'kFixedG0', 
+                                                          #'kNonRespondingIsolated',
+                                                          #'kDeadVFE', 
+                                                          #'kDeadFE', 
+                                                          #'kNoDataNoTP'
+                                                          #)
+#
+#
+
+    #ChannelStatusToBeExcluded = cms.vstring(
+        #'kDAC', 
+        #'kNoisy', 
+        #'kNNoisy', 
+        #'kFixedG6', 
+        #'kFixedG1', 
+        #'kFixedG0', 
+        #'kNonRespondingIsolated', 
+        #'kDeadVFE', 
+        #'kDeadFE', 
+        #'kNoDataNoTP'
+    #),
+
 
 
 #process.hcalDigis.silent = cms.untracked.bool(False)

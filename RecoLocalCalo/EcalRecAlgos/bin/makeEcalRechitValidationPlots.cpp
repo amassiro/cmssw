@@ -35,35 +35,50 @@ int main(int argc, char *argv[]) {
   //output
   TFile rfout{outFileName.c_str(), "recreate"};
   
-  int nbins = 100;
-  int last = 3000.;
+  int nbins = 200;
+  int last = 5000.;
   
   int nbins_energy = 300;
   float last_energy = 2.;
   
   int nbins_chi2 = 200;
-  float last_chi2 = 200.;
+  float last_chi2 = 100.;
   
-  int nbins_flag = 10;
+  int nbins_flag = 40;
+//   int nbins_flag = 1000;
   int last_flag = 1500;
+//   int nbins_flag = 40;
+//   int last_flag = 10000;
   
-  int nbins_extra = 10;
+  int nbins_extra = 200;
   int last_extra = 200;
   
   int nbins_delta = 201;  // use an odd number to center around 0
   float delta = 0.2;
   
   // RecHits plots for EB and EE on both GPU and CPU
-  auto hRechitsEBGPU = new TH1D("RechitsEBGPU", "RechitsEBGPU; No. of Rechits", nbins, 0, last);
-  auto hRechitsEBCPU = new TH1D("RechitsEBCPU", "RechitsEBCPU; No. of Rechits", nbins, 0, last);
-  auto hRechitsEEGPU = new TH1D("RechitsEEGPU", "RechitsEEGPU; No. of Rechits", nbins, 0, last);
-  auto hRechitsEECPU = new TH1D("RechitsEECPU", "RechitsEECPU; No. of Rechits", nbins, 0, last);
-  auto hRechitsEBGPUvsCPU = new TH2D("RechitsEBGPUvsCPU", "RechitsEBGPUvsCPU; CPU; GPU", last, 0, last, last, 0, last);
-  auto hRechitsEEGPUvsCPU = new TH2D("RechitsEEGPUvsCPU", "RechitsEEGPUvsCPU; CPU; GPU", last, 0, last, last, 0, last);
-  auto hRechitsEBGPUCPUratio = new TH1D("RechitsEBGPU/CPUratio", "RechitsEBGPU/CPUraio; GPU/CPU", 50, 0.9, 1.1);
-  auto hRechitsEEGPUCPUratio = new TH1D("RechitsEEGPU/CPUratio", "RechitsEEGPU/CPUratio; GPU/CPU", 50, 0.9, 1.1);
-  auto hRechitsEBdeltavsCPU = new TH2D("RechitsEBdeltavsCPU", "RechitsEBdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
-  auto hRechitsEEdeltavsCPU = new TH2D("RechitsEEdeltavsCPU", "RechitsEEdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
+  auto hRechitsEBGPU = new TH1D("RechitsEBGPU", "RechitsEBGPU; No. of Rechits. No Filter GPU", nbins, 0, last);
+  auto hRechitsEBCPU = new TH1D("RechitsEBCPU", "RechitsEBCPU; No. of Rechits. No Filter GPU", nbins, 0, last);
+  auto hRechitsEEGPU = new TH1D("RechitsEEGPU", "RechitsEEGPU; No. of Rechits. No Filter GPU", nbins, 0, last);
+  auto hRechitsEECPU = new TH1D("RechitsEECPU", "RechitsEECPU; No. of Rechits. No Filter GPU", nbins, 0, last);
+  auto hRechitsEBGPUvsCPU = new TH2D("RechitsEBGPUvsCPU", "RechitsEBGPUvsCPU; CPU; GPU. No Filter GPU", last, 0, last, last, 0, last);
+  auto hRechitsEEGPUvsCPU = new TH2D("RechitsEEGPUvsCPU", "RechitsEEGPUvsCPU; CPU; GPU. No Filter GPU", last, 0, last, last, 0, last);
+  auto hRechitsEBGPUCPUratio = new TH1D("RechitsEBGPU/CPUratio", "RechitsEBGPU/CPUratio; GPU/CPU. No Filter GPU", 200, 0.95, 1.05);
+  auto hRechitsEEGPUCPUratio = new TH1D("RechitsEEGPU/CPUratio", "RechitsEEGPU/CPUratio; GPU/CPU. No Filter GPU", 200, 0.95, 1.05);
+  auto hRechitsEBdeltavsCPU = new TH2D("RechitsEBdeltavsCPU", "RechitsEBdeltavsCPU. No Filter GPU", nbins, 0, last, nbins_delta, -delta, delta);
+  auto hRechitsEEdeltavsCPU = new TH2D("RechitsEEdeltavsCPU", "RechitsEEdeltavsCPU. No Filter GPU", nbins, 0, last, nbins_delta, -delta, delta);
+
+  // RecHits plots for EB and EE on both GPU and CPU
+  auto hSelectedRechitsEBGPU = new TH1D("RechitsEBGPU", "RechitsEBGPU; No. of Rechits", nbins, 0, last);
+  auto hSelectedRechitsEBCPU = new TH1D("RechitsEBCPU", "RechitsEBCPU; No. of Rechits", nbins, 0, last);
+  auto hSelectedRechitsEEGPU = new TH1D("RechitsEEGPU", "RechitsEEGPU; No. of Rechits", nbins, 0, last);
+  auto hSelectedRechitsEECPU = new TH1D("RechitsEECPU", "RechitsEECPU; No. of Rechits", nbins, 0, last);
+  auto hSelectedRechitsEBGPUvsCPU = new TH2D("RechitsEBGPUvsCPU", "RechitsEBGPUvsCPU; CPU; GPU", last, 0, last, last, 0, last);
+  auto hSelectedRechitsEEGPUvsCPU = new TH2D("RechitsEEGPUvsCPU", "RechitsEEGPUvsCPU; CPU; GPU", last, 0, last, last, 0, last);
+  auto hSelectedRechitsEBGPUCPUratio = new TH1D("RechitsEBGPU/CPUratio", "RechitsEBGPU/CPUratio; GPU/CPU", 200, 0.95, 1.05);
+  auto hSelectedRechitsEEGPUCPUratio = new TH1D("RechitsEEGPU/CPUratio", "RechitsEEGPU/CPUratio; GPU/CPU", 200, 0.95, 1.05);
+  auto hSelectedRechitsEBdeltavsCPU = new TH2D("RechitsEBdeltavsCPU", "RechitsEBdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
+  auto hSelectedRechitsEEdeltavsCPU = new TH2D("RechitsEEdeltavsCPU", "RechitsEEdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
   
   // Energies plots for EB and EE on both GPU and CPU
   auto hEnergiesEBGPU = new TH1D("EnergiesEBGPU", "EnergiesEBGPU; Energy [GeV]", nbins_energy, 0, last_energy);
@@ -72,8 +87,8 @@ int main(int argc, char *argv[]) {
   auto hEnergiesEECPU = new TH1D("EnergiesEECPU", "EnergiesEECPU; Energy [GeV]", nbins_energy, 0, last_energy);
   auto hEnergiesEBGPUvsCPU = new TH2D("EnergiesEBGPUvsCPU", "EnergiesEBGPUvsCPU; CPU; GPU", nbins_energy, 0, last_energy, nbins_energy, 0, last_energy);
   auto hEnergiesEEGPUvsCPU = new TH2D("EnergiesEEGPUvsCPU", "EnergiesEEGPUvsCPU; CPU; GPU", nbins_energy, 0, last_energy, nbins_energy, 0, last_energy);
-  auto hEnergiesEBGPUCPUratio = new TH1D("EnergiesEBGPU/CPUratio", "EnergiesEBGPU/CPUratio; GPU/CPU", 100, 0, 4);
-  auto hEnergiesEEGPUCPUratio = new TH1D("EnergiesEEGPU/CPUratio", "EnergiesEEGPU/CPUratio; GPU/CPU", 100, 0, 4);
+  auto hEnergiesEBGPUCPUratio = new TH1D("EnergiesEBGPU/CPUratio", "EnergiesEBGPU/CPUratio; GPU/CPU", 100, 0.8, 1.2);
+  auto hEnergiesEEGPUCPUratio = new TH1D("EnergiesEEGPU/CPUratio", "EnergiesEEGPU/CPUratio; GPU/CPU", 100, 0.8, 1.2);
   auto hEnergiesEBdeltavsCPU = new TH2D("EnergiesEBdeltavsCPU", "EnergiesEBdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
   auto hEnergiesEEdeltavsCPU = new TH2D("EnergiesEEdeltavsCPU", "EnergiesEEdeltavsCPU", nbins, 0, last, nbins_delta, -delta, delta);
   
@@ -84,22 +99,22 @@ int main(int argc, char *argv[]) {
   auto hChi2EECPU = new TH1D("Chi2EECPU", "Chi2EECPU; Ch^{2}", nbins_chi2, 0, last_chi2);
   auto hChi2EBGPUvsCPU = new TH2D("Chi2EBGPUvsCPU", "Chi2EBGPUvsCPU; CPU; GPU", nbins_chi2, 0, 100, nbins_chi2, 0, 100);
   auto hChi2EEGPUvsCPU = new TH2D("Chi2EEGPUvsCPU", "Chi2EEGPUvsCPU; CPU; GPU", nbins_chi2, 0, 100, nbins_chi2, 0, 100);
-  auto hChi2EBGPUCPUratio = new TH1D("Chi2EBGPU/CPUratio", "Chi2EBGPU/CPUratio; GPU/CPU", 100, 0, 2);
-  auto hChi2EEGPUCPUratio = new TH1D("Chi2EEGPU/CPUratio", "Chi2EEGPU/CPUratio; GPU/CPU", 100, 0, 2);
+  auto hChi2EBGPUCPUratio = new TH1D("Chi2EBGPU/CPUratio", "Chi2EBGPU/CPUratio; GPU/CPU", 100, 0.8, 1.2);
+  auto hChi2EEGPUCPUratio = new TH1D("Chi2EEGPU/CPUratio", "Chi2EEGPU/CPUratio; GPU/CPU", 100, 0.8, 1.2);
   auto hChi2EBdeltavsCPU = new TH2D("Chi2EBdeltavsCPU", "Chi2EBdeltavsCPU", nbins_chi2, 0, last_chi2, nbins_delta, -delta, delta);
   auto hChi2EEdeltavsCPU = new TH2D("Chi2EEdeltavsCPU", "Chi2EEdeltavsCPU", nbins_chi2, 0, last_chi2, nbins_delta, -delta, delta);
   
   // Flags plots for EB and EE on both GPU and CPU
-  auto hFlagsEBGPU = new TH1D("FlagsEBGPU", "FlagsEBGPU; Flags", nbins_flag, 0, last_flag);
-  auto hFlagsEBCPU = new TH1D("FlagsEBCPU", "FlagsEBCPU; Flags", nbins_flag, 0, last_flag);
-  auto hFlagsEEGPU = new TH1D("FlagsEEGPU", "FlagsEEGPU; Flags", nbins_flag, 0, last_flag);
-  auto hFlagsEECPU = new TH1D("FlagsEECPU", "FlagsEECPU; Flags", nbins_flag, 0, last_flag);
-  auto hFlagsEBGPUvsCPU = new TH2D("FlagsEBGPUvsCPU", "FlagsEBGPUvsCPU; CPU; GPU", nbins_flag, 0, last_flag, nbins_flag, 0, last_flag);
-  auto hFlagsEEGPUvsCPU = new TH2D("FlagsEEGPUvsCPU", "FlagsEEGPUvsCPU; CPU; GPU", nbins_flag, 0, last_flag, nbins_flag, 0, last_flag);
-  auto hFlagsEBGPUCPUratio = new TH1D("FlagsEBGPU/CPUratio", "FlagsEBGPU/CPUraio; GPU/CPU", 50, 0, 10);
-  auto hFlagsEEGPUCPUratio = new TH1D("FlagsEEGPU/CPUratio", "FlagsEEGPU/CPUratio; GPU/CPU", 50, 0, 10);
-  auto hFlagsEBdeltavsCPU = new TH2D("FlagsEBdeltavsCPU", "FlagsEBdeltavsCPU", nbins_flag, 0, last_flag, nbins_delta, -delta, delta);
-  auto hFlagsEEdeltavsCPU = new TH2D("FlagsEEdeltavsCPU", "FlagsEEdeltavsCPU", nbins_flag, 0, last_flag, nbins_delta, -delta, delta);
+  auto hFlagsEBGPU = new TH1D("FlagsEBGPU", "FlagsEBGPU; Flags", nbins_flag, -10, last_flag);
+  auto hFlagsEBCPU = new TH1D("FlagsEBCPU", "FlagsEBCPU; Flags", nbins_flag, -10, last_flag);
+  auto hFlagsEEGPU = new TH1D("FlagsEEGPU", "FlagsEEGPU; Flags", nbins_flag, -10, last_flag);
+  auto hFlagsEECPU = new TH1D("FlagsEECPU", "FlagsEECPU; Flags", nbins_flag, -10, last_flag);
+  auto hFlagsEBGPUvsCPU = new TH2D("FlagsEBGPUvsCPU", "FlagsEBGPUvsCPU; CPU; GPU", nbins_flag, -10, last_flag, nbins_flag, -10, last_flag);
+  auto hFlagsEEGPUvsCPU = new TH2D("FlagsEEGPUvsCPU", "FlagsEEGPUvsCPU; CPU; GPU", nbins_flag, -10, last_flag, nbins_flag, -10, last_flag);
+  auto hFlagsEBGPUCPUratio = new TH1D("FlagsEBGPU/CPUratio", "FlagsEBGPU/CPUratio; GPU/CPU", 50, -5, 10);
+  auto hFlagsEEGPUCPUratio = new TH1D("FlagsEEGPU/CPUratio", "FlagsEEGPU/CPUratio; GPU/CPU", 50, -5, 10);
+  auto hFlagsEBdeltavsCPU = new TH2D("FlagsEBdeltavsCPU", "FlagsEBdeltavsCPU", nbins_flag, -10, last_flag, nbins_delta, -delta, delta);
+  auto hFlagsEEdeltavsCPU = new TH2D("FlagsEEdeltavsCPU", "FlagsEEdeltavsCPU", nbins_flag, -10, last_flag, nbins_delta, -delta, delta);
   
   // Extras plots for EB and EE on both GPU and CPU
   auto hExtrasEBGPU = new TH1D("ExtrasEBGPU", "ExtrasEBGPU; No. of Extras", nbins_extra, 0, last_extra);
@@ -108,8 +123,8 @@ int main(int argc, char *argv[]) {
   auto hExtrasEECPU = new TH1D("ExtrasEECPU", "ExtrasEECPU; No. of Extras", nbins_extra, 0, last_extra);
   auto hExtrasEBGPUvsCPU = new TH2D("ExtrasEBGPUvsCPU", "ExtrasEBGPUvsCPU; CPU; GPU", nbins_extra, 0, last_extra,nbins_extra, 0, last_extra);
   auto hExtrasEEGPUvsCPU = new TH2D("ExtrasEEGPUvsCPU", "ExtrasEEGPUvsCPU; CPU; GPU", nbins_extra, 0, last_extra, nbins_extra, 0, last_extra);
-  auto hExtrasEBGPUCPUratio = new TH1D("ExtrasEBGPU/CPUratio", "ExtrasEBGPU/CPUraio; GPU/CPU", 50, 0.9, 1.1);
-  auto hExtrasEEGPUCPUratio = new TH1D("ExtrasEEGPU/CPUratio", "ExtrasEEGPU/CPUratio; GPU/CPU", 50, 0.9, 1.1);
+  auto hExtrasEBGPUCPUratio = new TH1D("ExtrasEBGPU/CPUratio", "ExtrasEBGPU/CPUratio; GPU/CPU", 50, 0.0, 2.0);
+  auto hExtrasEEGPUCPUratio = new TH1D("ExtrasEEGPU/CPUratio", "ExtrasEEGPU/CPUratio; GPU/CPU", 50, 0.0, 2.0);
   auto hExtrasEBdeltavsCPU = new TH2D("ExtrasEBdeltavsCPU", "ExtrasEBdeltavsCPU", nbins_extra, 0, last_extra, nbins_delta, -delta, delta);
   auto hExtrasEEdeltavsCPU = new TH2D("ExtrasEEdeltavsCPU", "ExtrasEEdeltavsCPU", nbins_extra, 0, last_extra, nbins_delta, -delta, delta);
   
@@ -127,18 +142,26 @@ int main(int argc, char *argv[]) {
   constexpr float eps_diff = 1e-3;
   
   // accumulate sizes for events and sizes of each event on both GPU and CPU
-  auto const nentries = rt->GetEntries();
+//   auto const nentries = rt->GetEntries();
+  int nentries = rt->GetEntries();
+  
+  //---- AM: tests 
+  if (nentries > 1000) {
+    nentries = 1000;
+  }
+//   nentries = 1;
+  
   std::cout << "#events to validate over: " << nentries << std::endl;
   for (int ie=0; ie<nentries; ++ie) {
     rt->GetEntry(ie);
     
-    const char* ordinal[] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+//     const char* ordinal[] = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
     auto cpu_eb_size = wcpuEB->bareProduct().size();
     auto cpu_ee_size = wcpuEE->bareProduct().size();
     auto gpu_eb_size = wgpuEB->bareProduct().energy.size();
     auto gpu_ee_size = wgpuEE->bareProduct().energy.size();
-    float eb_ratio = (float)gpu_eb_size/cpu_eb_size;
-    float ee_ratio = (float)gpu_ee_size/cpu_ee_size;
+    float eb_ratio = (float) gpu_eb_size/cpu_eb_size;
+    float ee_ratio = (float) gpu_ee_size/cpu_ee_size;
     
     // Filling up the histograms on events sizes for EB and EE on both GPU and CPU
     hRechitsEBGPU->Fill(gpu_eb_size);
@@ -167,6 +190,10 @@ int main(int argc, char *argv[]) {
   auto const nee = wcpuEE->bareProduct().size(); //like cpu_ee_size but set to constant
   */
     
+    uint selected_gpu_eb_size = 0;
+    uint selected_gpu_ee_size = 0;
+    
+    
     // EB:
     for (uint32_t i=0; i<gpu_eb_size; ++i) {
       auto const did_gpu = wgpuEB->bareProduct().did[i]; // set the did for the current RecHit
@@ -176,56 +203,69 @@ int main(int argc, char *argv[]) {
       auto const flag_gpu = wgpuEB->bareProduct().flagBits[i]; 
       auto const extra_gpu = wgpuEB->bareProduct().extra[i];
       
-      // find the Rechit on CPU reflecting the same did
-      auto const cpu_iter = wcpuEB->bareProduct().find(DetId{did_gpu}); 
-      if (cpu_iter == wcpuEB->bareProduct().end()) {
-        //   std::cerr << ie << ordinal[ie % 10] << " entry\n"
-        //           << "  Did not find a DetId " << did_gpu_eb
-        //         << " in a CPU collection\n";
-        continue;
+      // you have "-1" if the crystal is not selected
+      if ( enr_gpu>=0 ) {
+        selected_gpu_eb_size++;
+        
+        // find the Rechit on CPU reflecting the same did
+        auto const cpu_iter = wcpuEB->bareProduct().find(DetId{did_gpu}); 
+        if (cpu_iter == wcpuEB->bareProduct().end()) {
+          //           std::cerr << ie << ordinal[ie % 10] << " entry\n"
+          //                   << "  Did not find a DetId " << did_gpu_eb
+          //                 << " in a CPU collection\n";
+          std::cerr << "  Did not find a DetId " << did_gpu << " in a CPU collection\n";
+          continue;
+        }
+        // Set the variables for CPU
+        auto const enr_cpu = cpu_iter->energy();
+        auto const chi2_cpu = cpu_iter->chi2();
+        auto const flag_cpu = cpu_iter->flagBits();
+        auto const extra_cpu = cpu_iter->extra();
+        //       auto const flag_cpu = cpu_iter->flagBits() ? cpu_iter->flagBits():-1;
+        //       auto const extra_cpu = cpu_iter->extra() ? cpu_iter->extra():-1;
+        
+        // AM: TEST
+        //       if (extra_cpu != 10) continue;
+        
+        // Fill the energy and Chi2 histograms for GPU and CPU and their comparisons with delta
+        hEnergiesEBGPU->Fill(enr_gpu);
+        hEnergiesEBCPU->Fill(enr_cpu);
+        //       std::cout<<"EB CPU Energy:\t"<<enr_cpu<<std::endl;
+        hEnergiesEBGPUvsCPU->Fill(enr_cpu, enr_gpu);
+        hEnergiesEBGPUCPUratio->Fill(enr_gpu/enr_cpu);
+        hEnergiesEBdeltavsCPU->Fill(enr_cpu, enr_gpu-enr_cpu);
+        
+        hChi2EBGPU->Fill(chi2_gpu);
+        hChi2EBCPU->Fill(chi2_cpu);
+        hChi2EBGPUvsCPU->Fill(chi2_cpu, chi2_gpu);
+        hChi2EBGPUCPUratio->Fill(chi2_gpu/chi2_cpu);
+        hChi2EBdeltavsCPU->Fill(chi2_cpu, chi2_gpu-chi2_cpu);
+        
+        hFlagsEBGPU->Fill(flag_gpu);
+        hFlagsEBCPU->Fill(flag_cpu);
+        hFlagsEBGPUvsCPU->Fill(flag_cpu, flag_gpu);
+        hFlagsEBGPUCPUratio->Fill(flag_cpu ? flag_gpu/flag_cpu : -1);
+        hFlagsEBdeltavsCPU->Fill(flag_cpu, flag_gpu-flag_cpu);
+        
+        hExtrasEBGPU->Fill(extra_gpu);
+        hExtrasEBCPU->Fill(extra_cpu);
+        hExtrasEBGPUvsCPU->Fill(extra_cpu, extra_gpu);
+        hExtrasEBGPUCPUratio->Fill(extra_cpu ? extra_gpu/extra_cpu : -1);
+        hExtrasEBdeltavsCPU->Fill(extra_cpu, extra_gpu-extra_cpu);
+        
+        // Check if abs difference between GPU and CPU values for energy and Chi2 are smaller than eps, if not print message
+        // if ((std::abs(enr_gpu - enr_cpu) >= eps_diff) or
+        //      (std::abs(chi2_gpu - chi2_cpu) >= eps_diff) or std::isnan(chi2_gpu))
+        //  {
+        //      printf("EB eventid = %d chid = %d energy_gpu = %f energy_cpu %f chi2_gpu = %f chi2_cpu = %f\n",
+        //          ie, i, enr_gpu, enr_cpu, chi2_gpu, chi2_cpu);
+        //      if (std::isnan(chi2_gpu))
+        //        printf("*** nan ***\n");
+        //  } 
+        
       }
-      // Set the variables for CPU
-      auto const enr_cpu = cpu_iter->energy();
-      auto const chi2_cpu = cpu_iter->chi2();
-      auto const flag_cpu = cpu_iter->flagBits()? cpu_iter->flagBits():-1;
-      auto const extra_cpu = cpu_iter->extra()? cpu_iter->extra():-1;
-      
-      // Fill the energy and Chi2 histograms for GPU and CPU and their comparisons with delta
-      hEnergiesEBGPU->Fill(enr_gpu);
-      hEnergiesEBCPU->Fill(enr_cpu);
-      std::cout<<"EB CPU Energy:\t"<<enr_cpu<<std::endl;
-      hEnergiesEBGPUvsCPU->Fill(enr_cpu, enr_gpu);
-      hEnergiesEBGPUCPUratio->Fill(enr_gpu/enr_cpu);
-      hEnergiesEBdeltavsCPU->Fill(enr_cpu, enr_gpu-enr_cpu);
-      
-      hChi2EBGPU->Fill(chi2_gpu);
-      hChi2EBCPU->Fill(chi2_cpu);
-      hChi2EBGPUvsCPU->Fill(chi2_cpu, chi2_gpu);
-      hChi2EBGPUCPUratio->Fill(chi2_gpu/chi2_cpu);
-      hChi2EBdeltavsCPU->Fill(chi2_cpu, chi2_gpu-chi2_cpu);
-      
-      hFlagsEBGPU->Fill(flag_gpu);
-      hFlagsEBCPU->Fill(flag_cpu);
-      hFlagsEBGPUvsCPU->Fill(flag_cpu, flag_gpu);
-      hFlagsEBGPUCPUratio->Fill(flag_gpu/flag_cpu);
-      hFlagsEBdeltavsCPU->Fill(flag_cpu, flag_gpu-flag_cpu);
-      
-      hExtrasEBGPU->Fill(extra_gpu);
-      hExtrasEBCPU->Fill(extra_cpu);
-      hExtrasEBGPUvsCPU->Fill(extra_cpu, extra_gpu);
-      hExtrasEBGPUCPUratio->Fill(extra_gpu/extra_cpu);
-      hExtrasEBdeltavsCPU->Fill(extra_cpu, extra_gpu-extra_cpu);
-      
-      // Check if abs difference between GPU and CPU values for energy and Chi2 are smaller than eps, if not print message
-      // if ((std::abs(enr_gpu - enr_cpu) >= eps_diff) or
-      //      (std::abs(chi2_gpu - chi2_cpu) >= eps_diff) or std::isnan(chi2_gpu))
-      //  {
-      //      printf("EB eventid = %d chid = %d energy_gpu = %f energy_cpu %f chi2_gpu = %f chi2_cpu = %f\n",
-      //          ie, i, enr_gpu, enr_cpu, chi2_gpu, chi2_cpu);
-      //      if (std::isnan(chi2_gpu))
-      //        printf("*** nan ***\n");
-      //  } 
     }
+        
     // EE:
     for (uint32_t i=0; i<gpu_ee_size; ++i) {
       auto const did_gpu = wgpuEE->bareProduct().did[i]; // set the did for the current RecHit
@@ -235,62 +275,109 @@ int main(int argc, char *argv[]) {
       auto const flag_gpu = wgpuEE->bareProduct().flagBits[i]; 
       auto const extra_gpu = wgpuEE->bareProduct().extra[i];
       
-      // find the Rechit on CPU reflecting the same did
-      auto const cpu_iter = wcpuEE->bareProduct().find(DetId{did_gpu}); 
-      if (cpu_iter == wcpuEE->bareProduct().end()) {
-        //    std::cerr << ie << ordinal[ie % 10] << " entry\n"
-        //            << "  Did not find a DetId " << did_gpu
-        //          << " in a CPU collection\n";
-        continue;
+      // you have "-1" if the crystal is not selected
+      if ( enr_gpu>=0 ) {
+        selected_gpu_ee_size++;
+        
+        // find the Rechit on CPU reflecting the same did
+        auto const cpu_iter = wcpuEE->bareProduct().find(DetId{did_gpu}); 
+        if (cpu_iter == wcpuEE->bareProduct().end()) {
+          //    std::cerr << ie << ordinal[ie % 10] << " entry\n"
+          //            << "  Did not find a DetId " << did_gpu
+          //          << " in a CPU collection\n";
+          std::cerr << "  Did not find a DetId " << did_gpu << " in a CPU collection\n";
+          continue;
+        }
+        // Set the variables for CPU
+        auto const enr_cpu = cpu_iter->energy();
+        auto const chi2_cpu = cpu_iter->chi2();
+        auto const flag_cpu = cpu_iter->flagBits();
+        auto const extra_cpu = cpu_iter->extra();
+        //       auto const flag_cpu = cpu_iter->flagBits()?cpu_iter->flagBits():-1;
+        //       auto const extra_cpu = cpu_iter->extra()?cpu_iter->extra():-1;
+        
+        
+        // AM: TEST
+        //       if (extra_cpu != 10) continue;
+        
+        
+        // Fill the energy and Chi2 histograms for GPU and CPU and their comparisons with delta
+        hEnergiesEEGPU->Fill(enr_gpu);
+        hEnergiesEECPU->Fill(enr_cpu);
+        hEnergiesEEGPUvsCPU->Fill(enr_cpu, enr_gpu);
+        hEnergiesEEGPUCPUratio->Fill(enr_gpu/enr_cpu);
+        hEnergiesEEdeltavsCPU->Fill(enr_cpu, enr_gpu-enr_cpu);
+        
+        hChi2EEGPU->Fill(chi2_gpu);
+        hChi2EECPU->Fill(chi2_cpu);
+        hChi2EEGPUvsCPU->Fill(chi2_cpu, chi2_gpu);
+        hChi2EEGPUCPUratio->Fill(chi2_gpu/chi2_cpu);
+        hChi2EEdeltavsCPU->Fill(chi2_cpu, chi2_gpu-chi2_cpu);
+        
+        hFlagsEEGPU->Fill(flag_gpu);
+        hFlagsEECPU->Fill(flag_cpu);
+        hFlagsEEGPUvsCPU->Fill(flag_cpu, flag_gpu);
+        hFlagsEEGPUCPUratio->Fill(flag_cpu ? flag_gpu/flag_cpu : -1);
+        hFlagsEEdeltavsCPU->Fill(flag_cpu, flag_gpu-flag_cpu);
+        
+        hExtrasEEGPU->Fill(extra_gpu);
+        hExtrasEECPU->Fill(extra_cpu);
+        hExtrasEEGPUvsCPU->Fill(extra_cpu, extra_gpu);
+        hExtrasEEGPUCPUratio->Fill(extra_cpu ? extra_gpu/extra_cpu : -1);
+        hExtrasEEdeltavsCPU->Fill(extra_cpu, extra_gpu-extra_cpu);
+        
+        // Check if abs difference between GPU and CPU values for energy and Chi2 are smaller than eps, if not print message
+        // if ((std::abs(enr_gpu - enr_cpu) >= eps_diff) or
+        //      (std::abs(chi2_gpu - chi2_cpu) >= eps_diff) or std::isnan(chi2_gpu))
+        //  {
+        //      printf("EE eventid = %d chid = %d energy_gpu = %f energy_cpu %f chi2_gpu = %f chi2_cpu = %f\n",
+        //          ie, i, enr_gpu, enr_cpu, chi2_gpu, chi2_cpu);
+        //      if (std::isnan(chi2_gpu))
+        //        printf("*** nan ***\n");
+        //  } 
       }
-      // Set the variables for CPU
-      auto const enr_cpu = cpu_iter->energy();
-      auto const chi2_cpu = cpu_iter->chi2();
-      auto const flag_cpu = cpu_iter->flagBits()?cpu_iter->flagBits():-1;
-      auto const extra_cpu = cpu_iter->extra()?cpu_iter->extra():-1;
-      
-      
-      // Fill the energy and Chi2 histograms for GPU and CPU and their comparisons with delta
-      hEnergiesEEGPU->Fill(enr_gpu);
-      hEnergiesEECPU->Fill(enr_cpu);
-      hEnergiesEEGPUvsCPU->Fill(enr_cpu, enr_gpu);
-      hEnergiesEEGPUCPUratio->Fill(enr_gpu/enr_cpu);
-      hEnergiesEEdeltavsCPU->Fill(enr_cpu, enr_gpu-enr_cpu);
-      
-      hChi2EEGPU->Fill(chi2_gpu);
-      hChi2EECPU->Fill(chi2_cpu);
-      hChi2EEGPUvsCPU->Fill(chi2_cpu, chi2_gpu);
-      hChi2EEGPUCPUratio->Fill(chi2_gpu/chi2_cpu);
-      hChi2EEdeltavsCPU->Fill(chi2_cpu, chi2_gpu-chi2_cpu);
-      
-      hFlagsEEGPU->Fill(flag_gpu);
-      hFlagsEECPU->Fill(flag_cpu);
-      hFlagsEEGPUvsCPU->Fill(flag_cpu, flag_gpu);
-      hFlagsEEGPUCPUratio->Fill(flag_gpu/flag_cpu);
-      hFlagsEEdeltavsCPU->Fill(flag_cpu, flag_gpu-flag_cpu);
-      
-      hExtrasEEGPU->Fill(extra_gpu);
-      hExtrasEECPU->Fill(extra_cpu);
-      hExtrasEEGPUvsCPU->Fill(extra_cpu, extra_gpu);
-      hExtrasEEGPUCPUratio->Fill(extra_gpu/extra_cpu);
-      hExtrasEEdeltavsCPU->Fill(extra_cpu, extra_gpu-extra_cpu);
-      
-      // Check if abs difference between GPU and CPU values for energy and Chi2 are smaller than eps, if not print message
-      // if ((std::abs(enr_gpu - enr_cpu) >= eps_diff) or
-      //      (std::abs(chi2_gpu - chi2_cpu) >= eps_diff) or std::isnan(chi2_gpu))
-      //  {
-      //      printf("EE eventid = %d chid = %d energy_gpu = %f energy_cpu %f chi2_gpu = %f chi2_cpu = %f\n",
-      //          ie, i, enr_gpu, enr_cpu, chi2_gpu, chi2_cpu);
-      //      if (std::isnan(chi2_gpu))
-      //        printf("*** nan ***\n");
-      //  } 
     }
     
     
+    //
+    // now the rechit counting
+    //
+    float selected_eb_ratio = (float) selected_gpu_eb_size/cpu_eb_size;
+    float selected_ee_ratio = (float) selected_gpu_ee_size/cpu_ee_size;
+    
+    // Filling up the histograms on events sizes for EB and EE on both GPU and CPU
+    hSelectedRechitsEBGPU->Fill(selected_gpu_eb_size);
+    hSelectedRechitsEBCPU->Fill(cpu_eb_size);
+    hSelectedRechitsEEGPU->Fill(selected_gpu_ee_size);
+    hSelectedRechitsEECPU->Fill(cpu_ee_size);
+    hSelectedRechitsEBGPUvsCPU->Fill(cpu_eb_size, selected_gpu_eb_size);
+    hSelectedRechitsEEGPUvsCPU->Fill(cpu_ee_size, selected_gpu_ee_size);
+    hSelectedRechitsEBGPUCPUratio->Fill(selected_eb_ratio);
+    hSelectedRechitsEEGPUCPUratio->Fill(selected_ee_ratio);
+    hSelectedRechitsEBdeltavsCPU->Fill(cpu_eb_size, selected_gpu_eb_size-cpu_eb_size);
+    hSelectedRechitsEEdeltavsCPU->Fill(cpu_ee_size, selected_gpu_ee_size-cpu_ee_size);
+    
+    
+    
+    if (cpu_eb_size != selected_gpu_eb_size or cpu_ee_size != selected_gpu_ee_size) {
+      //       std::cerr << ie << ordinal[ie % 10] << " entry:\n"
+      std::cerr << ie << " entry:\n"
+      << "  EB size: " << std::setw(4) << cpu_eb_size << " (cpu) vs " << std::setw(4) << selected_gpu_eb_size << " (gpu)\n"
+      << "  EE size: " << std::setw(4) << cpu_ee_size << " (cpu) vs " << std::setw(4) << selected_gpu_ee_size << " (gpu)" << std::endl;
+    }
+    
+    
+    
   }
+  
+  
+  
+  
   // Plotting the results:
   {
     // Canvases Setup:
+    TCanvas cAllRechits("AllRechits", "AllRechits", 1750, 860);
+    cAllRechits.Divide(3, 2);
     TCanvas cRechits("Rechits", "Rechits", 1750, 860);
     cRechits.Divide(3, 2);
     TCanvas cEnergies("Energies", "Energies", 1750, 860);
@@ -303,18 +390,75 @@ int main(int argc, char *argv[]) {
     cExtras.Divide(3, 2);
     
     
+    
+    // Plotting the sizes of GPU vs CPU for each event of EB 
+    cAllRechits.cd(1);
+    {
+      gPad->SetLogy();
+      hRechitsEBCPU->SetLineColor(kRed);
+      hRechitsEBCPU->SetLineWidth(2);
+      hRechitsEBCPU->Draw("");
+      hRechitsEBGPU->SetLineColor(kBlue);
+      hRechitsEBGPU->SetLineWidth(2);
+      hRechitsEBGPU->Draw("sames");
+      cAllRechits.Update();
+      auto stats = (TPaveStats*)hRechitsEBGPU->FindObject("stats");
+      auto y2 = stats->GetY2NDC();
+      auto y1 = stats->GetY1NDC();
+      stats->SetY2NDC(y1);
+      stats->SetY1NDC(y1 - (y2-y1));
+    } 
+    cAllRechits.cd(4);
+    {
+      gPad->SetLogy();
+      hRechitsEECPU->SetLineColor(kRed);
+      hRechitsEECPU->SetLineWidth(2);
+      hRechitsEECPU->Draw("");
+      hRechitsEEGPU->SetLineColor(kBlue);
+      hRechitsEEGPU->SetLineWidth(2);
+      hRechitsEEGPU->Draw("sames");
+      cAllRechits.Update();
+      auto stats = (TPaveStats*)hRechitsEEGPU->FindObject("stats");
+      auto y2 = stats->GetY2NDC();
+      auto y1 = stats->GetY1NDC();
+      stats->SetY2NDC(y1);
+      stats->SetY1NDC(y1 - (y2-y1));
+    }
+    cAllRechits.cd(2); {
+      gStyle->SetPalette(55);
+      hRechitsEBGPUvsCPU->Draw("COLZ");
+    }
+    cAllRechits.cd(5); {
+      gStyle->SetPalette(55);
+      hRechitsEEGPUvsCPU->Draw("COLZ");
+    }
+    cAllRechits.cd(3); {
+      gPad->SetLogy();
+      //hRechitsEBdeltavsCPU->Draw("COLZ");
+      hRechitsEBGPUCPUratio->Draw("");
+    }
+    cAllRechits.cd(6); {
+      gPad->SetLogy();
+      //hRechitsEEdeltavsCPU->Draw("COLZ");
+      hRechitsEEGPUCPUratio->Draw("");
+    }
+    cAllRechits.SaveAs("ecal-allrechits.root");
+    cAllRechits.SaveAs("ecal-allrechits.png");
+    
+       
+    
     // Plotting the sizes of GPU vs CPU for each event of EB 
     cRechits.cd(1);
     {
       gPad->SetLogy();
-      hRechitsEBCPU->SetLineColor(kRed);
-      hRechitsEBCPU->SetLineWidth(1.);
-      hRechitsEBCPU->Draw("");
-      hRechitsEBGPU->SetLineColor(kBlue);
-      hRechitsEBGPU->SetLineWidth(1.);
-      hRechitsEBGPU->Draw("sames");
+      hSelectedRechitsEBCPU->SetLineColor(kRed);
+      hSelectedRechitsEBCPU->SetLineWidth(2);
+      hSelectedRechitsEBCPU->Draw("");
+      hSelectedRechitsEBGPU->SetLineColor(kBlue);
+      hSelectedRechitsEBGPU->SetLineWidth(2);
+      hSelectedRechitsEBGPU->Draw("sames");
       cRechits.Update();
-      auto stats = (TPaveStats*)hRechitsEBGPU->FindObject("stats");
+      auto stats = (TPaveStats*)hSelectedRechitsEBGPU->FindObject("stats");
       auto y2 = stats->GetY2NDC();
       auto y1 = stats->GetY1NDC();
       stats->SetY2NDC(y1);
@@ -323,14 +467,14 @@ int main(int argc, char *argv[]) {
     cRechits.cd(4);
     {
       gPad->SetLogy();
-      hRechitsEECPU->SetLineColor(kRed);
-      hRechitsEECPU->SetLineWidth(1.);
-      hRechitsEECPU->Draw("");
-      hRechitsEEGPU->SetLineColor(kBlue);
-      hRechitsEEGPU->SetLineWidth(1.);
-      hRechitsEEGPU->Draw("sames");
+      hSelectedRechitsEECPU->SetLineColor(kRed);
+      hSelectedRechitsEECPU->SetLineWidth(2);
+      hSelectedRechitsEECPU->Draw("");
+      hSelectedRechitsEEGPU->SetLineColor(kBlue);
+      hSelectedRechitsEEGPU->SetLineWidth(2);
+      hSelectedRechitsEEGPU->Draw("sames");
       cRechits.Update();
-      auto stats = (TPaveStats*)hRechitsEEGPU->FindObject("stats");
+      auto stats = (TPaveStats*)hSelectedRechitsEEGPU->FindObject("stats");
       auto y2 = stats->GetY2NDC();
       auto y1 = stats->GetY1NDC();
       stats->SetY2NDC(y1);
@@ -338,21 +482,21 @@ int main(int argc, char *argv[]) {
     }
     cRechits.cd(2); {
       gStyle->SetPalette(55);
-      hRechitsEBGPUvsCPU->Draw("COLZ");
+      hSelectedRechitsEBGPUvsCPU->Draw("COLZ");
     }
     cRechits.cd(5); {
       gStyle->SetPalette(55);
-      hRechitsEEGPUvsCPU->Draw("COLZ");
+      hSelectedRechitsEEGPUvsCPU->Draw("COLZ");
     }
     cRechits.cd(3); {
       gPad->SetLogy();
-      //hRechitsEBdeltavsCPU->Draw("COLZ");
-      hRechitsEBGPUCPUratio->Draw("");
+      //hSelectedRechitsEBdeltavsCPU->Draw("COLZ");
+      hSelectedRechitsEBGPUCPUratio->Draw("");
     }
     cRechits.cd(6); {
       gPad->SetLogy();
-      //hRechitsEEdeltavsCPU->Draw("COLZ");
-      hRechitsEEGPUCPUratio->Draw("");
+      //hSelectedRechitsEEdeltavsCPU->Draw("COLZ");
+      hSelectedRechitsEEGPUCPUratio->Draw("");
     }
     cRechits.SaveAs("ecal-rechits.root");
     cRechits.SaveAs("ecal-rechits.png");
@@ -362,10 +506,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hEnergiesEBCPU->SetLineColor(kBlack);
-      hEnergiesEBCPU->SetLineWidth(1.);
+      hEnergiesEBCPU->SetLineWidth(2);
       hEnergiesEBCPU->Draw("");
       hEnergiesEBGPU->SetLineColor(kBlue);
-      hEnergiesEBGPU->SetLineWidth(1.);
+      hEnergiesEBGPU->SetLineWidth(2);
       hEnergiesEBGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hEnergiesEBGPU->FindObject("stats");
@@ -378,10 +522,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hEnergiesEECPU->SetLineColor(kBlack);
-      hEnergiesEECPU->SetLineWidth(1.);
+      hEnergiesEECPU->SetLineWidth(2);
       hEnergiesEECPU->Draw("");
       hEnergiesEEGPU->SetLineColor(kBlue);
-      hEnergiesEEGPU->SetLineWidth(1.);
+      hEnergiesEEGPU->SetLineWidth(2);
       hEnergiesEEGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hEnergiesEEGPU->FindObject("stats");
@@ -414,10 +558,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hChi2EBCPU->SetLineColor(kBlack);
-      hChi2EBCPU->SetLineWidth(1.);
+      hChi2EBCPU->SetLineWidth(2);
       hChi2EBCPU->Draw("");
       hChi2EBGPU->SetLineColor(kBlue);
-      hChi2EBGPU->SetLineWidth(1.);
+      hChi2EBGPU->SetLineWidth(2);
       hChi2EBGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hChi2EBGPU->FindObject("stats");
@@ -430,10 +574,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hChi2EECPU->SetLineColor(kBlack);
-      hChi2EECPU->SetLineWidth(1.);
+      hChi2EECPU->SetLineWidth(2);
       hChi2EECPU->Draw("");
       hChi2EEGPU->SetLineColor(kBlue);
-      hChi2EEGPU->SetLineWidth(1.);
+      hChi2EEGPU->SetLineWidth(2);
       hChi2EEGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hChi2EEGPU->FindObject("stats");
@@ -466,10 +610,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hFlagsEBCPU->SetLineColor(kBlack);
-      hFlagsEBCPU->SetLineWidth(1.);
+      hFlagsEBCPU->SetLineWidth(2);
       hFlagsEBCPU->Draw("");
       hFlagsEBGPU->SetLineColor(kBlue);
-      hFlagsEBGPU->SetLineWidth(1.);
+      hFlagsEBGPU->SetLineWidth(2);
       hFlagsEBGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hFlagsEBGPU->FindObject("stats");
@@ -482,10 +626,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hFlagsEECPU->SetLineColor(kBlack);
-      hFlagsEECPU->SetLineWidth(1.);
+      hFlagsEECPU->SetLineWidth(2);
       hFlagsEECPU->Draw("");
       hFlagsEEGPU->SetLineColor(kBlue);
-      hFlagsEEGPU->SetLineWidth(1.);
+      hFlagsEEGPU->SetLineWidth(2);
       hFlagsEEGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hFlagsEEGPU->FindObject("stats");
@@ -518,10 +662,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hExtrasEBCPU->SetLineColor(kBlack);
-      hExtrasEBCPU->SetLineWidth(1.);
+      hExtrasEBCPU->SetLineWidth(2);
       hExtrasEBCPU->Draw("");
       hExtrasEBGPU->SetLineColor(kBlue);
-      hExtrasEBGPU->SetLineWidth(1.);
+      hExtrasEBGPU->SetLineWidth(2);
       hExtrasEBGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hExtrasEBGPU->FindObject("stats");
@@ -534,10 +678,10 @@ int main(int argc, char *argv[]) {
     {
       gPad->SetLogy();
       hExtrasEECPU->SetLineColor(kBlack);
-      hExtrasEECPU->SetLineWidth(1.);
+      hExtrasEECPU->SetLineWidth(2);
       hExtrasEECPU->Draw("");
       hExtrasEEGPU->SetLineColor(kBlue);
-      hExtrasEEGPU->SetLineWidth(1.);
+      hExtrasEEGPU->SetLineWidth(2);
       hExtrasEEGPU->Draw("sames");
       gPad->Update();
       auto stats = (TPaveStats*)hExtrasEEGPU->FindObject("stats");

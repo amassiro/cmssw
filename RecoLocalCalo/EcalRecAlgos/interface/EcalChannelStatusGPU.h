@@ -14,7 +14,7 @@ class EcalChannelStatusGPU {
 public:
   struct Product {
     ~Product();
-    uint32_t *status = nullptr;
+    uint16_t *status = nullptr;
   };
   
 #ifndef __CUDACC__
@@ -34,7 +34,7 @@ public:
 private:
   // in the future, we need to arrange so to avoid this copy on the host
   // store eb first then ee
-  std::vector<uint32_t, CUDAHostAllocator<uint32_t>> status_;
+  std::vector<uint16_t, CUDAHostAllocator<uint16_t>> status_;
     
   CUDAESProduct<Product> product_;
   

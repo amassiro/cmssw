@@ -182,7 +182,10 @@ public:
   }
   
   /// set the flags (from Flags or ESFlags) 
+  // ---- AM FIXME Just as a test     ----> when I forced to 0
   void setFlag(int flag) {flagBits_|= (0x1 << flag);}
+//   void setFlag(int flag) {flagBits_ = 0;}
+  
   void unsetFlag(int flag) {flagBits_ &= ~(0x1 << flag);}
 
   /// check if the flag is true
@@ -212,11 +215,12 @@ public:
     // no flag assigned, assume good
     return kGood;
   }
-
   
   uint32_t flagBits() const { return flagBits_; }
   
-  uint32_t extra() const { return extra_; }
+  uint32_t extra() const { 
+    return extra_;
+  }
   
   
 private:

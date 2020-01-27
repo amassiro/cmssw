@@ -25,8 +25,8 @@ namespace ecal {
     typename type_wrapper<reco::StorageScalarType, L>::type energy;
     typename type_wrapper<reco::StorageScalarType, L>::type time;
     typename type_wrapper<reco::StorageScalarType, L>::type chi2;
-    typename type_wrapper<uint32_t, L>::type flagBits; // store rechit condition (see Flags enum) in a bit-wise way
     typename type_wrapper<uint32_t, L>::type extra;    // packed uint32_t for timeError, chi2, energyError
+    typename type_wrapper<uint32_t, L>::type flagBits; // store rechit condition (see Flags enum) in a bit-wise way
     
     // refrence https://github.com/cms-sw/cmssw/blob/master/DataFormats/EcalRecHit/interface/EcalRecHit.h
 
@@ -39,8 +39,8 @@ namespace ecal {
       energy.resize(size);
       time.resize(size);
       chi2.resize(size);
-      flagBits.resize(size);
       extra.resize(size);
+      flagBits.resize(size);
       did.resize(size);
     }
   };

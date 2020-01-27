@@ -44,8 +44,8 @@ void EcalCPURecHitProducer::fillDescriptions(
         edm::ConfigurationDescriptions& confDesc) {
     edm::ParameterSetDescription desc;
 
-    desc.add<edm::InputTag>("recHitsInLabelEB", edm::InputTag{"ecalRecHitProducerGPU", "EcalRecHitsGPUEB"});
-    desc.add<edm::InputTag>("recHitsInLabelEE", edm::InputTag{"ecalRecHitProducerGPU", "EcalRecHitsGPUEE"});
+    desc.add<edm::InputTag>("recHitsInLabelEB", edm::InputTag{"ecalRecHitProducerGPU", "EcalRecHitsEB"});
+    desc.add<edm::InputTag>("recHitsInLabelEE", edm::InputTag{"ecalRecHitProducerGPU", "EcalRecHitsEE"});
     desc.add<std::string>("recHitsOutLabelEB", "EcalRecHitsEB");
     desc.add<std::string>("recHitsOutLabelEE", "EcalRecHitsEE");
     desc.add<bool>("containsTimingInformation", false);
@@ -99,7 +99,10 @@ void EcalCPURecHitProducer::acquire(
                                recHitsEE_.did.size() * sizeof(uint32_t),
                                cudaMemcpyDeviceToHost,
                                ctx.stream().id()) );
-
+// 
+//     ./CUDADataFormats/EcalRecHitSoA/interface/RecoTypes.h:using StorageScalarType = float;
+// 
+    
     cudaCheck( cudaMemcpyAsync(recHitsEB_.energy.data(),
                                ebRecHits.energy,
                                recHitsEB_.energy.size() * sizeof(::ecal::reco::StorageScalarType),   // AM: FIX
@@ -121,6 +124,17 @@ void EcalCPURecHitProducer::acquire(
                                recHitsEE_.chi2.size() * sizeof(::ecal::reco::StorageScalarType),   // AM: FIX
                                cudaMemcpyDeviceToHost,
                                ctx.stream().id()) );
+
+    cudaCheck( cudaMemcpyAsync(recHitsEB_.extra.data(),
+                               ebRecHits.extra,
+                               recHitsEB_.extra.size() * sizeof(uint32_t),
+                               cudaMemcpyDeviceToHost,
+                               ctx.stream().id()) );
+    cudaCheck( cudaMemcpyAsync(recHitsEE_.extra.data(),
+                               eeRecHits.extra,
+                               recHitsEE_.extra.size() * sizeof(uint32_t),
+                               cudaMemcpyDeviceToHost,
+                               ctx.stream().id()) );
     
     cudaCheck( cudaMemcpyAsync(recHitsEB_.flagBits.data(),
                                ebRecHits.flagBits,
@@ -135,6 +149,12 @@ void EcalCPURecHitProducer::acquire(
  
     
     
+    
+    
+    
+//     for (unsigned int ieb = 0; ieb <  ebRecHits.size ; ieb++) {
+//       if (recHitsEB_.extra[ieb] != 0 ) std::cout << " [ " << ieb << " :: " << ebRecHits.size << " ] [ " << recHitsEB_.did[ieb] << " ] eb extra = " << recHitsEB_.extra[ieb] << std::endl;
+//     }
     
 //     
 //     for (unsigned int ieb = 0; ieb <  ebRecHits.size ; ieb++) {

@@ -104,6 +104,10 @@ void EcalCPUUncalibRecHitProducer::acquire(
                                cudaMemcpyDeviceToHost,
                                ctx.stream().id()) );
 
+//
+//     ./CUDADataFormats/EcalRecHitSoA/interface/RecoTypes.h:using ComputationScalarType = float;    
+//     typename type_wrapper<reco::ComputationScalarType, L>::type amplitudesAll;
+    
     cudaCheck( cudaMemcpyAsync(recHitsEB_.amplitudesAll.data(),
                                ebRecHits.amplitudesAll,
                                recHitsEB_.amplitudesAll.size() * sizeof(float),   // AM: FIX

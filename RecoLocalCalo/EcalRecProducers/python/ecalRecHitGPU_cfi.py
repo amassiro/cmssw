@@ -8,8 +8,10 @@ ecalRecHitGPU = cms.EDProducer("EcalRecHitProducerGPU",
     uncalibrecHitsInLabelEB = cms.InputTag("ecalUncalibRecHitProducerGPU","EcalUncalibRecHitsEB"),
     uncalibrecHitsInLabelEE = cms.InputTag("ecalUncalibRecHitProducerGPU","EcalUncalibRecHitsEE"),
           
-    recHitsLabelEB = cms.string("EcalRecHitsGPUEB"),
-    recHitsLabelEE = cms.string("EcalRecHitsGPUEE"),
+    #recHitsLabelEB = cms.string("EcalRecHitsGPUEB"),
+    #recHitsLabelEE = cms.string("EcalRecHitsGPUEE"),
+    recHitsLabelEB = cms.string("EcalRecHitsEB"),
+    recHitsLabelEE = cms.string("EcalRecHitsEE"),
  
     maxNumberHits = cms.uint32(20000),  # FIXME AM
   
@@ -47,11 +49,12 @@ ecalRecHitGPU = cms.EDProducer("EcalRecHitProducerGPU",
     
     ## define maximal and minimal values for the laser corrections
     
-    #EBLaserMIN = cms.double(0.5),
-    #EELaserMIN = cms.double(0.5),
+    EBLaserMIN = cms.double(0.01),                    #    EBLaserMIN = cms.double(0.5),
+    EELaserMIN = cms.double(0.01),                    #    EELaserMIN = cms.double(0.5),
+                                                     
+    EBLaserMAX = cms.double(30.0),                    #    EBLaserMAX = cms.double(3.0),
+    EELaserMAX = cms.double(30.0),                    #    EELaserMAX = cms.double(8.0),
 
-    #EBLaserMAX = cms.double(3.0),
-    #EELaserMAX = cms.double(8.0),
 
     ## useful if time is not calculated, as at HLT                        
     #skipTimeCalib = cms.bool(False),                         

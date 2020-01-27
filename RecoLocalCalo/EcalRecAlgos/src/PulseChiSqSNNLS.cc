@@ -422,7 +422,11 @@ bool PulseChiSqSNNLS::NNLS() {
 }
 
 void PulseChiSqSNNLS::NNLSUnconstrainParameter(Index idxp) {
-  
+//   
+//   https://github.com/cms-sw/cmssw/blob/master/RecoLocalCalo/HcalRecAlgos/src/MahiFit.cc#L475
+//   
+//   -> improved for hcal
+//   
   aTamat.col(_nP).swap(aTamat.col(idxp));
   aTamat.row(_nP).swap(aTamat.row(idxp));
   _pulsemat.col(_nP).swap(_pulsemat.col(idxp));

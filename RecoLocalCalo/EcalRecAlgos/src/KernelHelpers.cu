@@ -69,6 +69,111 @@ int dcc(int ieta, int iphi) {
 
 
 
+
+//        
+// ---- why on hell things are so complex and not simple ???
+//        
+  
+
+__device__ 
+int lm_channel (int iX, int iY) {
+  
+  static const int idx_[] = {
+    // 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+    1, 2, 2, 2, 2, 4, 4, 4, 4,
+    6, 6, 6, 6, 8, 8, 8, 8,  // 3
+    1, 2, 2, 2, 2, 4, 4, 4, 4,
+    6, 6, 6, 6, 8, 8, 8, 8,  // 2
+    1, 3, 3, 3, 3, 5, 5, 5, 5,
+    7, 7, 7, 7, 9, 9, 9, 9,  // 1
+    1, 3, 3, 3, 3, 5, 5, 5, 5,
+    7, 7, 7, 7, 9, 9, 9, 9  // 0
+    // 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+  };
+  
+  int iym, ixm, il, ic, ii;
+  iym = 4;
+  ixm = 17;
+  int iX_ = iX + 1;
+  int iY_ = iY + 1;
+  il = iym - iY_;
+  ic = iX_ - 1;
+  ii = il * ixm + ic;
+  if (ii < 0 || ii > (int)(sizeof(idx_) / sizeof(int))) {
+    return -1;
+  };
+  return idx_[ii];
+  
+}
+
+
+
+__device__ 
+int localCoord_x (int ieta, int iphi) {
+  int iz = 1;
+  if (ieta < 0) {
+    iz = -1; 
+  }
+  ieta *= iz;
+//   int iphi_ = iphi;
+//   if (iphi_ > 360) {
+//     iphi_ -= 360;
+//   }
+  int ix = ieta - 1;
+//   int iy = (iphi_ - 1) % 20;
+//   if (iz == -1) {
+//     iy = 19 - iy;
+//   }
+  
+  return ix;
+}
+
+
+__device__ 
+int localCoord_y (int ieta, int iphi) {
+  int iz = 1;
+  if (ieta < 0) {
+    iz = -1; 
+  }
+//   ieta *= iz;
+  int iphi_ = iphi;
+  if (iphi_ > 360) {
+    iphi_ -= 360;
+  }
+//   int ix = ieta - 1;
+  int iy = (iphi_ - 1) % 20;
+  if (iz == -1) {
+    iy = 19 - iy;
+  }
+  
+  return iy;
+}
+
+
+__device__ 
+int lmmod (int ieta, int iphi) {
+  
+  int ix = localCoord_x(ieta, iphi);
+  int iy = localCoord_y(ieta, iphi);
+
+  return lm_channel(ix / 5, iy / 5);
+}
+  
+  
+  
+__device__ 
+int side (int ieta, int iphi) {
+  int ilmmod = lmmod(ieta, iphi);
+  return (ilmmod % 2 == 0) ? 1 : 0;
+}
+  
+  
+
+  
+
+  
+
+
 }
 }
 
@@ -84,7 +189,7 @@ uint32_t hashedIndexEB(uint32_t id) {
 
 // 
 // https://cmssdt.cern.ch/lxr/source/CalibCalorimetry/EcalLaserAnalyzer/src/MEEBGeom.cc
-// 
+//  function: "lmr"
 
 __device__ 
 int laser_monitoring_region_EB(uint32_t id) {
@@ -97,23 +202,21 @@ int laser_monitoring_region_EB(uint32_t id) {
   else {
     ieta = - ietaAbs(id);            
   }
+  
   int idcc = dcc(ieta, (int) (iphi(id)) );
   int ism = idcc - 9;
   
-//   int iside = side(ieta, iphi);
-  int iside = positiveZ(id) ? 1 : 0;
+  int iside = side(ieta, (int) (iphi(id)) );
+//   int iside = positiveZ(id) ? 1 : 0;
   
   return ( 1 + 2 * (ism - 1) + iside );
+//   return ieta;
+//   return (int) (iphi(id));
+//   return idcc;
+//   return iside;
   
 }
         
-
-
-
-
-
-
-
 
 
 
@@ -289,9 +392,12 @@ int laser_monitoring_region_EE(uint32_t id) {
   uint32_t iX = (ix(id) - 1) / 5 + 1;
   uint32_t iY = (iy(id) - 1) / 5 + 1;
 
-  
-  // AM FIXME Check if correct convention  
-  int iz = positiveZ(id) ? 1 : 0;
+  // Correct convention 
+  //   * @param iz iz/zside index: -1 for EE-, +1 for EE+
+  //   https://github.com/cms-sw/cmssw/blob/master/DataFormats/EcalDetId/interface/EEDetId.h#L68-L71
+  //   zside in https://github.com/cms-sw/cmssw/blob/master/CalibCalorimetry/EcalLaserCorrection/src/EcalLaserDbService.cc#L63
+  //   
+  int iz = positiveZ(id) ? 1 : -1;
   
   int iquad = quadrant(iX, iY);
   int isect = sector(iX, iY);

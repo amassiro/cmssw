@@ -128,9 +128,9 @@ void kernel_prep_1d_and_initialize(
         SampleVector::Scalar gainratio = 0.;
 
         // store into shared mem for initialization
-        shr_hasSwitchToGain6[threadIdx.x] = gainId == EcalMgpaBitwiseGain6;
-        shr_hasSwitchToGain1[threadIdx.x] = gainId == EcalMgpaBitwiseGain1;
-        shr_hasSwitchToGain0_tmp[threadIdx.x] = gainId == EcalMgpaBitwiseGain0;
+        shr_hasSwitchToGain6[threadIdx.x] = (gainId == EcalMgpaBitwiseGain6);
+        shr_hasSwitchToGain1[threadIdx.x] = (gainId == EcalMgpaBitwiseGain1);
+        shr_hasSwitchToGain0_tmp[threadIdx.x] = (gainId == EcalMgpaBitwiseGain0);
         shr_hasSwitchToGain0[threadIdx.x] = shr_hasSwitchToGain0_tmp[threadIdx.x];
         shr_counts[threadIdx.x] = 0;
         __syncthreads();
@@ -142,7 +142,7 @@ void kernel_prep_1d_and_initialize(
                 shr_counts[threadIdx.x] += 
                     shr_hasSwitchToGain0[threadIdx.x+i];
         }
-        shr_isSaturated[threadIdx.x] = shr_counts[threadIdx.x] == 5;
+        shr_isSaturated[threadIdx.x] = (shr_counts[threadIdx.x] == 5);
 
         //
         // unrolled reductions
@@ -205,7 +205,7 @@ void kernel_prep_1d_and_initialize(
             hasSwitchToGain1[ch] = shr_hasSwitchToGain1[threadIdx.x];
 
             // set only for the threadIdx.x corresponding to sample==0
-            check_hasSwitchToGain0 = shr_hasSwitchToGain0_tmp[threadIdx.x];
+            check_hasSwitchToGain0 = shr_hasSwitchToGain0_tmp[threadIdx.x];  // AM : FIXME : why only for sample 0? It should be done for sample 5 since then used only for sample 5
 
             shr_isSaturated[threadIdx.x+3] = 
                 shr_isSaturated[threadIdx.x] || 
@@ -213,6 +213,10 @@ void kernel_prep_1d_and_initialize(
             isSaturated[ch] = shr_isSaturated[threadIdx.x+3];
         }
 
+        if (sample==sample_max) {
+          check_hasSwitchToGain0 = shr_hasSwitchToGain0_tmp[threadIdx.x];  // AM : FIXME : why only for sample 0? It should be done for sample 5 since then used only for sample 5
+        }
+        
         // TODO: w/o this sync, there is a race
         // if (threadIdx == sample_max) below uses max sample thread, not for 0 sample
         // check if we can remove it
@@ -280,34 +284,100 @@ void kernel_prep_1d_and_initialize(
             if (shr_hasSwitchToGain1[chStart])
                 flag |= 0x1 << EcalUncalibratedRecHit::kHasSwitchToGain1;
 
+            
+       //     int lastSampleBeforeSaturation = -2;
+       //     for(unsigned int iSample = 0; iSample < EcalDataFrame::MAXSAMPLES; iSample++) {
+       //       if ( ((EcalDataFrame)(*itdg)).sample(iSample).gainId() == 0 ) {
+       //         lastSampleBeforeSaturation=iSample-1;
+       //         break;
+       //       }
+       //     }
+       //     
+       //     // === amplitude computation ===
+       //     
+       //     if ( lastSampleBeforeSaturation == 4 ) { // saturation on the expected max sample
+       //       result.emplace_back((*itdg).id(), 4095*12, 0, 0, 0);
+       //       auto & uncalibRecHit = result.back();
+       //       uncalibRecHit.setFlagBit( EcalUncalibratedRecHit::kSaturated );   // FIXME AM : TEST : remember to un-comment
+       //       // do not propagate the default chi2 = -1 value to the calib rechit (mapped to 64), set it to 0 when saturation
+       //       uncalibRecHit.setChi2(0);
+       //     } else if ( lastSampleBeforeSaturation >= -1 ) { // saturation on other samples: cannot extrapolate from the fourth one
+       //         int gainId = ((EcalDataFrame)(*itdg)).sample(5).gainId();
+       //         if (gainId==0) gainId=3;
+       //         auto pedestal = pedVec[gainId-1];
+       //         auto gainratio = gainRatios[gainId-1];
+       //         double amplitude = ((double)(((EcalDataFrame)(*itdg)).sample(5).adc()) - pedestal) * gainratio;
+       //         result.emplace_back((*itdg).id(), amplitude, 0, 0, 0);
+       //         auto & uncalibRecHit = result.back();
+       //         uncalibRecHit.setFlagBit( EcalUncalibratedRecHit::kSaturated );  //  FIXME AM : TEST : remember to un-comment
+       //         // do not propagate the default chi2 = -1 value to the calib rechit (mapped to 64), set it to 0 when saturation
+       //         uncalibRecHit.setChi2(0);
+       //     } else {
+       //       // multifit
+          
+            
             // this corresponds to cpu branching on lastSampleBeforeSaturation
             // likely false
-            if (check_hasSwitchToGain0) {
-                // assign for the case some sample having gainId == 0
-                //energies[ch] = amplitudes[ch][sample_max];
-                energies[ch] = amplitude;
+//            if (check_hasSwitchToGain0) {
+//              // assign for the case some sample having gainId == 0
+//              //energies[ch] = amplitudes[ch][sample_max];
+//              energies[ch] = amplitude;
+//              
+//              // check if samples before sample_max have true
+//              bool saturated_before_max = false;
+//              #pragma unroll
+//              for (char ii=0; ii<5; ii++)
+//                saturated_before_max = saturated_before_max ||
+//                shr_hasSwitchToGain0[chStart + ii];
+//              
+//              // if saturation is in the max sample and not in the first 5
+//              if (!saturated_before_max && 
+//                shr_hasSwitchToGain0[threadMax])
+//                energies[ch] = 49140; // 4095 * 12
+//                //---- AM FIXME : no pedestal subtraction???  
+//                //It should be "(4095. - pedestal) * gainratio"
+//                
+//                // set state flag to terminate further processing of this channel
+//                acState[ch] = static_cast<char>(MinimizationState::Precomputed); 
+//              flag |= 0x1 << EcalUncalibratedRecHit::kSaturated;  //  FIXME AM : TEST : remember to un-comment
+//              flags[ch] = flag;
+//              return;
+//            }
 
-                // check if samples before sample_max have true
-                bool saturated_before_max = false;
-                #pragma unroll
-                for (char ii=0; ii<5; ii++)
-                    saturated_before_max = saturated_before_max ||
-                        shr_hasSwitchToGain0[chStart + ii];
+//            
+// AM : my new version to fix "flags" 30 <-> 32 and 0 <-> 2
+//            
 
-                // if saturation is in the max sample and not in the first 5
-                if (!saturated_before_max && 
-                    shr_hasSwitchToGain0[threadMax])
-                    energies[ch] = 49140; // 4095 * 12
-                    //---- AM FIXME : no pedestal subtraction???  
-                    //It should be "(4095. - pedestal) * gainratio"
-
-                // set state flag to terminate further processing of this channel
-                acState[ch] = static_cast<char>(MinimizationState::Precomputed); 
-                flag |= 0x1 << EcalUncalibratedRecHit::kSaturated;
-                flags[ch] = flag;
-                return;
+            // check if samples before sample_max have true
+            bool saturated_before_max = false;
+            #pragma unroll
+            for (char ii=0; ii<5; ii++) {
+              saturated_before_max = saturated_before_max || shr_hasSwitchToGain0[chStart + ii];
             }
-
+            
+            // if saturation is in the max sample and not in the first 5
+            if (!saturated_before_max && shr_hasSwitchToGain0[threadMax]) {
+              energies[ch] = 49140; // 4095 * 12
+              //---- AM FIXME : no pedestal subtraction???  
+              //It should be "(4095. - pedestal) * gainratio"
+              acState[ch] = static_cast<char>(MinimizationState::Precomputed); 
+              flag |= 0x1 << EcalUncalibratedRecHit::kSaturated;   // FIXME AM : TEST : remember to un-comment
+              flags[ch] = flag;
+              return;
+            }
+            
+            if (check_hasSwitchToGain0) {
+              energies[ch] = amplitude;
+              // set state flag to terminate further processing of this channel
+              acState[ch] = static_cast<char>(MinimizationState::Precomputed); 
+              flag |= 0x1 << EcalUncalibratedRecHit::kSaturated;  //  FIXME AM : TEST : remember to un-comment
+              flags[ch] = flag;
+              return;
+            }
+            
+              
+            
+            
             // according to cpu version
 //            auto max_amplitude = amplitudes[ch][sample_max]; 
             auto const max_amplitude = amplitude;

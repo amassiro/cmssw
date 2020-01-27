@@ -72,6 +72,10 @@ void EcalRecHitConvertGPU2CPUFormat::produce(
     recHitsCPUEB->reserve(hRecHitsGPUEB->energy.size());
     recHitsCPUEE->reserve(hRecHitsGPUEE->energy.size());
 
+//     
+//     explicit EcalRecHit(const DetId& id, float energy, float time, uint32_t extra = 0, uint32_t flagBits = 0):
+//     
+    
     for (uint32_t i=0; i<hRecHitsGPUEB->energy.size(); ++i) {
       
       //
@@ -85,10 +89,12 @@ void EcalRecHitConvertGPU2CPUFormat::produce(
           DetId{hRecHitsGPUEB->did[i]},
           hRecHitsGPUEB->energy[i],
           hRecHitsGPUEB->time[i],
-          hRecHitsGPUEB->chi2[i],
+          hRecHitsGPUEB->extra[i],
           hRecHitsGPUEB->flagBits[i]
         );
       }
+
+//       std::cout << " EB :: extra [" << i << "::" << hRecHitsGPUEB->energy.size() << "] = " << hRecHitsGPUEB->extra[i] << std::endl;        
       
 //         (*recHitsCPUEB)[i].setJitterError(hRecHitsGPUEB->timeError[i]);
 //         auto const offset = i * EcalDataFrame::MAXSAMPLES;
@@ -109,10 +115,12 @@ void EcalRecHitConvertGPU2CPUFormat::produce(
           DetId{hRecHitsGPUEE->did[i]},
           hRecHitsGPUEE->energy[i],
           hRecHitsGPUEE->time[i],
-          hRecHitsGPUEE->chi2[i],
+          hRecHitsGPUEE->extra[i],
           hRecHitsGPUEE->flagBits[i]
         );
       }
+      
+//       std::cout << " EE :: extra [" << i << "::" << hRecHitsGPUEE->energy.size() << "] = " << hRecHitsGPUEE->extra[i] << std::endl;        
       
 //         (*recHitsCPUEE)[i].setJitterError(hRecHitsGPUEE->timeError[i]);
 //         auto const offset = i * EcalDataFrame::MAXSAMPLES;

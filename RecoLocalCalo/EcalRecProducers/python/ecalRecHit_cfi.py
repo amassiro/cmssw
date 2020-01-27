@@ -24,17 +24,18 @@ ecalRecHit = cms.EDProducer("EcalRecHitProducer",
     algo = cms.string("EcalRecHitWorkerSimple"),
     # define maximal and minimal values for the laser corrections
     
-    EBLaserMIN = cms.double(0.5),
-    EELaserMIN = cms.double(0.5),
-
-    EBLaserMAX = cms.double(3.0),
-    EELaserMAX = cms.double(8.0),
+    EBLaserMIN = cms.double(0.01),                    #    EBLaserMIN = cms.double(0.5),
+    EELaserMIN = cms.double(0.01),                    #    EELaserMIN = cms.double(0.5),
+                                                     
+    EBLaserMAX = cms.double(30.0),                    #    EBLaserMAX = cms.double(3.0),
+    EELaserMAX = cms.double(30.0),                    #    EELaserMAX = cms.double(8.0),
 
     # useful if time is not calculated, as at HLT                        
     skipTimeCalib = cms.bool(False),                         
 
     # apply laser corrections
     laserCorrection = cms.bool(True),
+    #laserCorrection = cms.bool(False),
                             
     # reco flags association to DB flag
     flagsMapDBReco = cms.PSet(
@@ -53,8 +54,9 @@ ecalRecHit = cms.EDProducer("EcalRecHitProducer",
     recoverEEIsolatedChannels = cms.bool(False),
     recoverEBVFE  = cms.bool(False),
     recoverEEVFE  = cms.bool(False),
-    recoverEBFE = cms.bool(True),
-    recoverEEFE = cms.bool(True),
+    recoverEBFE = cms.bool(True),  
+    recoverEEFE = cms.bool(True),  
+    
     #db statuses for which recovery in EE/EB should not be attempted           
     dbStatusToBeExcludedEE = cms.vint32(
                                         14,  # dead, no TP

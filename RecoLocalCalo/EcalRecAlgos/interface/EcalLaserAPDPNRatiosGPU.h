@@ -39,13 +39,13 @@ public:
 private:
   // in the future, we need to arrange so to avoid this copy on the host
   // store eb first then ee
-  std::vector<float, CUDAHostAllocator<float>> p1_;
-  std::vector<float, CUDAHostAllocator<float>> p2_;
-  std::vector<float, CUDAHostAllocator<float>> p3_;
+  std::vector<float, CUDAHostAllocator<float> > p1_;
+  std::vector<float, CUDAHostAllocator<float> > p2_;
+  std::vector<float, CUDAHostAllocator<float> > p3_;
   
-  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t>> t1_;
-  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t>> t2_;
-  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t>> t3_;
+  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t> > t1_;
+  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t> > t2_;
+  std::vector<edm::TimeValue_t, CUDAHostAllocator<edm::TimeValue_t> > t3_;
 
   CUDAESProduct<Product> product_;
   

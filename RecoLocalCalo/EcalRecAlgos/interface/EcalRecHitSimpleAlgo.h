@@ -44,9 +44,14 @@ class EcalRecHitSimpleAlgo : public EcalRecHitAbsAlgo {
     float energy = uncalibRH.amplitude()*adcToGeVConstant_*intercalibConstant;
     float time   = uncalibRH.jitter() * clockToNsConstant + timeIntercalib;
 
+    // AM: FIXME // for the time being suppressed to match GPU version
+    time = 0.;
+    
     EcalRecHit rh( uncalibRH.id(), energy, time );
     rh.setChi2( uncalibRH.chi2() );
-    rh.setEnergyError( uncalibRH.amplitudeError()*adcToGeVConstant_*intercalibConstant);
+    // AM: FIXME // for the time being suppressed to match "extra"
+//     rh.setEnergyError( uncalibRH.amplitudeError()*adcToGeVConstant_*intercalibConstant);
+    rh.setEnergyError( 0.*adcToGeVConstant_*intercalibConstant);
     /* rh.setOutOfTimeEnergy( uncalibRH.outOfTimeEnergy() * adcToGeVConstant_ * intercalibConstant ); */
     /* rh.setOutOfTimeChi2( uncalibRH.outOfTimeChi2() ); */
     rh.setTimeError(uncalibRH.jitterErrorBits());
@@ -85,6 +90,7 @@ class EcalRecHitSimpleAlgo : public EcalRecHitAbsAlgo {
     }
     
     if (good) rh.setFlag(EcalRecHit::kGood);
+
     return rh;
   }
 

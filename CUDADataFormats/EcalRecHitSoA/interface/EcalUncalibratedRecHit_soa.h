@@ -52,6 +52,8 @@ namespace ecal {
     UncalibratedRecHit& operator=(UncalibratedRecHit&&) = default;
     
     // TODO: std::array causes root's dictionary problems
+    //     ./CUDADataFormats/EcalRecHitSoA/interface/RecoTypes.h:using ComputationScalarType = float;
+    //     
     typename type_wrapper<reco::ComputationScalarType, L>::type amplitudesAll;
     //    typename type_wrapper<std::array<reco::ComputationScalarType, 
     //        EcalDataFrame::MAXSAMPLES>, L>::type amplitudesAll;

@@ -19,7 +19,7 @@ namespace ecal {
       uint32_t ChannelStatusToBeExcludedSize, 
       bool killDeadChannels,
       // for flags setting
-      uint32_t const* expanded_v_DB_reco_flags,
+      int const* expanded_v_DB_reco_flags,
       uint32_t const* expanded_Sizes_v_DB_reco_flags,
       uint32_t const* expanded_flagbit_v_DB_reco_flags,
       uint32_t expanded_v_DB_reco_flagsSize,
@@ -27,7 +27,7 @@ namespace ecal {
       // conditions
       float const* adc2gev,
       float const* intercalib,
-      uint32_t const* status,
+      uint16_t const* status,
       float const* apdpnrefs,
       float const* alphas,
       // input for transparency corrections
@@ -55,6 +55,8 @@ namespace ecal {
       ::ecal::reco::StorageScalarType const* time_ee,   
       ::ecal::reco::StorageScalarType const* chi2_eb,   
       ::ecal::reco::StorageScalarType const* chi2_ee,   
+      uint32_t const* flags_eb,   
+      uint32_t const* flags_ee,   
       // output
       uint32_t *did,
       ::ecal::reco::StorageScalarType* energy,   // in energy [GeV]  

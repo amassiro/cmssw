@@ -310,8 +310,13 @@ namespace ecal {
       
       bool killDeadChannels;
       
+      float EBLaserMIN;
+      float EELaserMIN;
+      float EBLaserMAX;
+      float EELaserMAX;
+      
 //       std::vector<std::vector<uint32_t> > v_DB_reco_flags;
-      uint32_t* expanded_v_DB_reco_flags;
+      int* expanded_v_DB_reco_flags;
       uint32_t* expanded_Sizes_v_DB_reco_flags;
       uint32_t* expanded_flagbit_v_DB_reco_flags;
       uint32_t expanded_v_DB_reco_flagsSize;
@@ -344,8 +349,7 @@ namespace ecal {
       cudaCheck( cudaMalloc((void**)&flagBits,
                             size * sizeof(uint32_t)) );
       cudaCheck( cudaMalloc((void**)&extra,
-                            size * sizeof(uint32_t)) );
-      
+                            size * sizeof(uint32_t)) );      
       cudaCheck( cudaMalloc((void**)&did,
                             size * sizeof(uint32_t)) );
     }
