@@ -45,3 +45,4 @@ namespace ecal {
 }  // namespace ecal
 
 #endif  // EventFilter_EcalRawToDigi_interface_ElectronicsMappingGPU_h
+
