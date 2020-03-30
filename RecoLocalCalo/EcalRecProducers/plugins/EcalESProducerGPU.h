@@ -11,34 +11,34 @@
 
 #include <iostream>
 
-template <typename Target, typename Source, typename Record>
+template<typename Target, typename Source, typename Record>
 class EcalESProducerGPU : public edm::ESProducer {
 public:
-  explicit EcalESProducerGPU(edm::ParameterSet const& ps) {
-    auto const label = ps.getParameter<std::string>("label");
-    std::string name = ps.getParameter<std::string>("ComponentName");
-    auto cc = setWhatProduced(this, name);
-    cc.setConsumes(token_, edm::ESInputTag{"", label});
-  }
+    explicit EcalESProducerGPU(edm::ParameterSet const& ps) {
+        auto const label = ps.getParameter<std::string>("label");
+        std::string name = ps.getParameter<std::string>("ComponentName");
+        auto cc = setWhatProduced(this, name);
+        cc.setConsumes(token_, edm::ESInputTag{"", label});
+    }
+   
+    std::unique_ptr<Target> produce(Record const& record) {
+        // retrieve conditions in old format 
+        auto sourceProduct = record.getTransientHandle(token_);
 
-  std::unique_ptr<Target> produce(Record const& record) {
-    // retrieve conditions in old format
-    auto sourceProduct = record.getTransientHandle(token_);
+        return std::make_unique<Target>(*sourceProduct);
+    }
 
-    return std::make_unique<Target>(*sourceProduct);
-  }
+    static void fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
+        edm::ParameterSetDescription desc;
 
-  static void fillDescriptions(edm::ConfigurationDescriptions& confDesc) {
-    edm::ParameterSetDescription desc;
-
-    std::string label = Target::name() + "ESProducer";
-    desc.add<std::string>("ComponentName", "");
-    desc.add<std::string>("label", "")->setComment("Product Label");
-    confDesc.add(label, desc);
-  }
+        std::string label = Target::name() + "ESProducer";
+        desc.add<std::string>("ComponentName", "");
+        desc.add<std::string>("label", "")->setComment("Product Label");
+        confDesc.add(label, desc);
+    }
 
 private:
-  edm::ESGetToken<Source, Record> token_;
+    edm::ESGetToken<Source, Record> token_;
 };
 
 #endif
