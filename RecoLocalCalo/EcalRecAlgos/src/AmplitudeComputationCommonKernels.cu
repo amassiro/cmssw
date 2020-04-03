@@ -503,4 +503,3 @@ namespace ecal {
 
   }  // namespace multifit
 }  // namespace ecal
-

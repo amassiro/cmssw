@@ -21,43 +21,40 @@ ElectronicsMappingGPU::ElectronicsMappingGPU(EcalMappingElectronics const& mappi
         EcalElectronicsId eid{barrelValues[i].electronicsid};
         EBDetId did{EBDetId::unhashIndex(i)};
         eid2did_[eid.linearIndex()] = did.rawId();
-    }
-    
-    // fill in ee
-    auto const& endcapValues = mapping.endcapItems();
-    for (unsigned int i=0; i<endcapValues.size(); i++) {
+      }
+
+      // fill in ee
+      auto const& endcapValues = mapping.endcapItems();
+      for (unsigned int i = 0; i < endcapValues.size(); i++) {
         EcalElectronicsId eid{endcapValues[i].electronicsid};
         EEDetId did{EEDetId::unhashIndex(i)};
         eid2did_[eid.linearIndex()] = did.rawId();
+      }
     }
-}
 
-ElectronicsMappingGPU::Product::~Product() {
-    // deallocation
-    cudaCheck( cudaFree(eid2did) );
-}
+    ElectronicsMappingGPU::Product::~Product() {
+      // deallocation
+      cudaCheck(cudaFree(eid2did));
+    }
 
-ElectronicsMappingGPU::Product const& ElectronicsMappingGPU::getProduct(
-        cudaStream_t cudaStream) const
-{
-    auto const& product = product_.dataForCurrentDeviceAsync(cudaStream,
-        [this](ElectronicsMappingGPU::Product& product, cudaStream_t cudaStream) {
+    ElectronicsMappingGPU::Product const& ElectronicsMappingGPU::getProduct(cudaStream_t cudaStream) const {
+      auto const& product = product_.dataForCurrentDeviceAsync(
+          cudaStream, [this](ElectronicsMappingGPU::Product& product, cudaStream_t cudaStream) {
             // malloc
-            cudaCheck( cudaMalloc((void**)&product.eid2did,
-                                  this->eid2did_.size() * sizeof(uint32_t)) );
+            cudaCheck(cudaMalloc((void**)&product.eid2did, this->eid2did_.size() * sizeof(uint32_t)));
 
-            // transfer 
-            cudaCheck( cudaMemcpyAsync(product.eid2did,
-                                       this->eid2did_.data(),
-                                       this->eid2did_.size() * sizeof(uint32_t),
-                                       cudaMemcpyHostToDevice,
-                                       cudaStream) );
-        }
-    );
+            // transfer
+            cudaCheck(cudaMemcpyAsync(product.eid2did,
+                                      this->eid2did_.data(),
+                                      this->eid2did_.size() * sizeof(uint32_t),
+                                      cudaMemcpyHostToDevice,
+                                      cudaStream));
+          });
 
-    return product;
-}
+      return product;
+    }
 
-}}
+  }  // namespace raw
+}  // namespace ecal
 
 TYPELOOKUP_DATA_REG(ecal::raw::ElectronicsMappingGPU);
