@@ -302,7 +302,7 @@ namespace ecal {
 
         cudaCheck(cudaMalloc((void**)&energy, size * sizeof(::ecal::reco::StorageScalarType)));
         cudaCheck(cudaMalloc((void**)&time, size * sizeof(::ecal::reco::StorageScalarType)));
-        cudaCheck(cudaMalloc((void**)&chi2, size * sizeof(::ecal::reco::StorageScalarType)));
+//         cudaCheck(cudaMalloc((void**)&chi2, size * sizeof(::ecal::reco::StorageScalarType)));
         cudaCheck(cudaMalloc((void**)&flagBits, size * sizeof(uint32_t)));
         cudaCheck(cudaMalloc((void**)&extra, size * sizeof(uint32_t)));
         cudaCheck(cudaMalloc((void**)&did, size * sizeof(uint32_t)));
@@ -314,7 +314,7 @@ namespace ecal {
 
         cudaCheck(cudaFree(energy));
         cudaCheck(cudaFree(time));
-        cudaCheck(cudaFree(chi2));
+//         cudaCheck(cudaFree(chi2));
         cudaCheck(cudaFree(flagBits));
         cudaCheck(cudaFree(extra));
         cudaCheck(cudaFree(did));

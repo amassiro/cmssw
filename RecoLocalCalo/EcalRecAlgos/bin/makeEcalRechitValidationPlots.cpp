@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
       auto const did_gpu = wgpuEB->bareProduct().did[i];  // set the did for the current RecHit
       // Set the variables for GPU
       auto const enr_gpu = wgpuEB->bareProduct().energy[i];
-      auto const chi2_gpu = wgpuEB->bareProduct().chi2[i];
+      auto const chi2_gpu = 1; // wgpuEB->bareProduct().chi2[i];
       auto const flag_gpu = wgpuEB->bareProduct().flagBits[i];
       auto const extra_gpu = wgpuEB->bareProduct().extra[i];
 
@@ -322,7 +322,7 @@ int main(int argc, char *argv[]) {
       auto const did_gpu = wgpuEE->bareProduct().did[i];  // set the did for the current RecHit
       // Set the variables for GPU
       auto const enr_gpu = wgpuEE->bareProduct().energy[i];
-      auto const chi2_gpu = wgpuEE->bareProduct().chi2[i];
+      auto const chi2_gpu = 1.; // wgpuEE->bareProduct().chi2[i];
       auto const flag_gpu = wgpuEE->bareProduct().flagBits[i];
       auto const extra_gpu = wgpuEE->bareProduct().extra[i];
 

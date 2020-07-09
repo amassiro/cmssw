@@ -23,7 +23,7 @@ namespace ecal {
 
     typename type_wrapper<reco::StorageScalarType, L>::type energy;
     typename type_wrapper<reco::StorageScalarType, L>::type time;
-    typename type_wrapper<reco::StorageScalarType, L>::type chi2;  // should we remove this, since already included in "extra" ?
+//     typename type_wrapper<reco::StorageScalarType, L>::type chi2;  // should we remove this, since already included in "extra" ?
     typename type_wrapper<uint32_t, L>::type extra;     // packed uint32_t for timeError, chi2, energyError
     typename type_wrapper<uint32_t, L>::type flagBits;  // store rechit condition (see Flags enum) in a bit-wise way
 
@@ -33,7 +33,7 @@ namespace ecal {
     typename std::enable_if<std::is_same<U, Tag::soa>::value, void>::type resize(size_t size) {
       energy.resize(size);
       time.resize(size);
-      chi2.resize(size);
+//       chi2.resize(size);
       extra.resize(size);
       flagBits.resize(size);
       did.resize(size);

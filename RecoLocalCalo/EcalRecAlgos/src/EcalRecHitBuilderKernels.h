@@ -67,7 +67,7 @@ namespace ecal {
         uint32_t* did,
         ::ecal::reco::StorageScalarType* energy,  // in energy [GeV]
         ::ecal::reco::StorageScalarType* time,
-        ::ecal::reco::StorageScalarType* chi2,
+//         ::ecal::reco::StorageScalarType* chi2,
         uint32_t* flagBits,
         uint32_t* extra,
         int const nchannels,

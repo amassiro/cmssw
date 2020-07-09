@@ -101,16 +101,16 @@ void EcalCPURecHitProducer::acquire(edm::Event const& event,
                             cudaMemcpyDeviceToHost,
                             ctx.stream()));
 
-  cudaCheck(cudaMemcpyAsync(recHitsEB_.chi2.data(),
-                            ebRecHits.chi2,
-                            recHitsEB_.chi2.size() * sizeof(::ecal::reco::StorageScalarType),
-                            cudaMemcpyDeviceToHost,
-                            ctx.stream()));
-  cudaCheck(cudaMemcpyAsync(recHitsEE_.chi2.data(),
-                            eeRecHits.chi2,
-                            recHitsEE_.chi2.size() * sizeof(::ecal::reco::StorageScalarType),
-                            cudaMemcpyDeviceToHost,
-                            ctx.stream()));
+//   cudaCheck(cudaMemcpyAsync(recHitsEB_.chi2.data(),
+//                             ebRecHits.chi2,
+//                             recHitsEB_.chi2.size() * sizeof(::ecal::reco::StorageScalarType),
+//                             cudaMemcpyDeviceToHost,
+//                             ctx.stream()));
+//   cudaCheck(cudaMemcpyAsync(recHitsEE_.chi2.data(),
+//                             eeRecHits.chi2,
+//                             recHitsEE_.chi2.size() * sizeof(::ecal::reco::StorageScalarType),
+//                             cudaMemcpyDeviceToHost,
+//                             ctx.stream()));
 
   cudaCheck(cudaMemcpyAsync(recHitsEB_.extra.data(),
                             ebRecHits.extra,

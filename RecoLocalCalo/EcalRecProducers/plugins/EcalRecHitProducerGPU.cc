@@ -377,7 +377,7 @@ void EcalRecHitProducerGPU::produce(edm::Event& event, edm::EventSetup const& se
 
   // shift ptrs for ee
   eeRecHits.energy += neb_;
-  eeRecHits.chi2 += neb_;
+//   eeRecHits.chi2 += neb_;
   eeRecHits.did += neb_;
   eeRecHits.time += neb_;
   eeRecHits.extra += neb_;

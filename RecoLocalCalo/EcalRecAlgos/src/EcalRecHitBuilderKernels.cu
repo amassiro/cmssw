@@ -126,7 +126,7 @@ namespace ecal {
         uint32_t* did,
         ::ecal::reco::StorageScalarType* energy,  // in energy [GeV]
         ::ecal::reco::StorageScalarType* time,
-        ::ecal::reco::StorageScalarType* chi2,
+//         ::ecal::reco::StorageScalarType* chi2,
         uint32_t* flagBits,
         uint32_t* extra,
         // other
@@ -352,10 +352,10 @@ namespace ecal {
         // Time is not saved so far, FIXME
         //         time[ch] = time_in[inputCh];
 
-        if (chi2_in[inputCh] > 64)
-          chi2[ch] = 64;
-        else
-          chi2[ch] = chi2_in[inputCh];
+//         if (chi2_in[inputCh] > 64)
+//           chi2[ch] = 64;
+//         else
+//           chi2[ch] = chi2_in[inputCh];
 
         // NB: calculate the "flagBits extra"  --> not really "flags", but actually an encoded version of energy uncertainty, time unc., ...
         extra[ch] = 0;
@@ -368,7 +368,8 @@ namespace ecal {
         uint32_t width;
         uint32_t value;
 
-        float chi2_temp = chi2[ch];
+        float chi2_temp = chi2_in[inputCh] ;
+//         float chi2_temp = chi2[ch];
         if (chi2_temp > 64)
           chi2_temp = 64;
         // use 7 bits
@@ -655,7 +656,7 @@ namespace ecal {
           eventOutputGPU.did,
           eventOutputGPU.energy,
           eventOutputGPU.time,
-          eventOutputGPU.chi2,
+//           eventOutputGPU.chi2,
           eventOutputGPU.flagBits,
           eventOutputGPU.extra,
           // other
