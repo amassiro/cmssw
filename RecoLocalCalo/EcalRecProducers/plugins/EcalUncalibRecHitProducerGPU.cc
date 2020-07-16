@@ -75,7 +75,8 @@ private:
 
   cms::cuda::ContextState cudaState_;
 
-  uint32_t maxNumberHits_;
+  uint32_t maxNumberHitsEB_;
+  uint32_t maxNumberHitsEE_;
   uint32_t neb_, nee_;
 };
 
@@ -126,7 +127,8 @@ void EcalUncalibRecHitProducerGPU::fillDescriptions(edm::ConfigurationDescriptio
   desc.add<double>("outOfTimeThresholdGain61mEE", 1000);
   desc.add<double>("amplitudeThresholdEB", 10);
   desc.add<double>("amplitudeThresholdEE", 10);
-  desc.add<uint32_t>("maxNumberHits", 20000);  //---- AM TEST
+  desc.add<uint32_t>("maxNumberHitsEB", 61200);
+  desc.add<uint32_t>("maxNumberHitsEE", 14648);
   desc.add<std::vector<uint32_t>>("kernelMinimizeThreads", {32, 1, 1});
   // ---- default false or true? It was set to true, but at HLT it is false
   desc.add<bool>("shouldRunTimingComputation", false);
@@ -170,8 +172,9 @@ EcalUncalibRecHitProducerGPU::EcalUncalibRecHitProducerGPU(const edm::ParameterS
   auto amplitudeThreshEE = ps.getParameter<double>("amplitudeThresholdEE");
 
   // max number of digis to allocate for
-  maxNumberHits_ = ps.getParameter<uint32_t>("maxNumberHits");
-
+  maxNumberHitsEB_ = ps.getParameter<uint32_t>("maxNumberHitsEB");
+  maxNumberHitsEE_ = ps.getParameter<uint32_t>("maxNumberHitsEE");
+  
   // switch to run timing computation kernels
   configParameters_.shouldRunTimingComputation = ps.getParameter<bool>("shouldRunTimingComputation");
 
@@ -244,10 +247,10 @@ EcalUncalibRecHitProducerGPU::EcalUncalibRecHitProducerGPU(const edm::ParameterS
   configParameters_.outOfTimeThreshG61mEE = outOfTimeThreshG61mEE;
 
   // allocate event output data
-  eventOutputDataGPU_.allocate(configParameters_, maxNumberHits_);
+  eventOutputDataGPU_.allocate(configParameters_, maxNumberHitsEB_+maxNumberHitsEE_);
 
   // allocate scratch data for gpu
-  eventDataForScratchGPU_.allocate(configParameters_, maxNumberHits_);
+  eventDataForScratchGPU_.allocate(configParameters_, maxNumberHitsEB_+maxNumberHitsEE_);
 }
 
 EcalUncalibRecHitProducerGPU::~EcalUncalibRecHitProducerGPU() {

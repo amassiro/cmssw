@@ -31,7 +31,8 @@ namespace ecal {
     };
 
     struct ConfigurationParameters {
-      uint32_t maxChannels;
+      uint32_t maxChannelsEE;
+      uint32_t maxChannelsEB;
     };
 
     struct OutputDataCPU {
@@ -48,10 +49,10 @@ namespace ecal {
       // FIXME: we should separate max channels parameter for eb and ee
       // FIXME: replace hardcoded values
       void allocate(ConfigurationParameters const &config) {
-        cudaCheck(cudaMalloc((void **)&samplesEB, config.maxChannels * sizeof(uint16_t) * 10));
-        cudaCheck(cudaMalloc((void **)&samplesEE, config.maxChannels * sizeof(uint16_t) * 10));
-        cudaCheck(cudaMalloc((void **)&idsEB, config.maxChannels * sizeof(uint32_t)));
-        cudaCheck(cudaMalloc((void **)&idsEE, config.maxChannels * sizeof(uint32_t)));
+        cudaCheck(cudaMalloc((void **)&samplesEB, config.maxChannelsEB * sizeof(uint16_t) * 10));
+        cudaCheck(cudaMalloc((void **)&samplesEE, config.maxChannelsEE * sizeof(uint16_t) * 10));
+        cudaCheck(cudaMalloc((void **)&idsEB, config.maxChannelsEB * sizeof(uint32_t)));
+        cudaCheck(cudaMalloc((void **)&idsEE, config.maxChannelsEE * sizeof(uint32_t)));
       }
 
       void deallocate(ConfigurationParameters const &config) {
